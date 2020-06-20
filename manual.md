@@ -329,6 +329,8 @@ alias grepip='grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"'
 * [Hacktrics.xyz](https://book.hacktricks.xyz/)
 * [blog.g0tmi1k.com](https://blog.g0tmi1k.com/)
 * [absolom.com](https://www.absolomb.com/)
+* [GTFObins](https://gtfobins.github.io/)
+* [LOLBas](https://lolbas-project.github.io/#)
 
 ## Videos
 
