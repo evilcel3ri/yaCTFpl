@@ -548,7 +548,6 @@ for i in `seq 1 254`; do ping 192.168.1.$i; done
 Invoke-Webrequest -Uri <IP> -OutFile <DestFile>
 ```
 
-
 ## Cracking
 
 Decompress with tar:
