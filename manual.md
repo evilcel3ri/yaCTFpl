@@ -96,6 +96,15 @@ hydra -L users.txt -P pass.txt IP ssh
 
 [Go to Post-Exploitation](#post-exploitation)
 
+#### Port 53 open
+
+* add the IP and a domain name to your `/etc/hosts` files
+* try a zone transfer:
+
+```sh
+host -l <DOMAIN> <IP>
+```
+
 #### Port 80 open
 
 * Web-service running, use `dirb` or `gobuster` to get the most information as possible.
