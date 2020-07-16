@@ -201,9 +201,12 @@ smbclient //<IP>/<PATH> -c "prompt OFF; recurse ON; cd '\<PATH>\'; lcd
 * Existing NFS mount
 
 * Mount the file system on your computer:
+
 ```sh
+nmap -sV --script=nfs-showmount <target>
 mkdir temp
 mount -o nolock IP:/ $PWD/temp
+mount -o rw,vers=2 <target>:<share> <local_directory>
 ```
 
 #### Existing databases
@@ -227,8 +230,6 @@ mongo -u <USER> -p <PASSWORD> <HOST:PORT/DB>
 > db.task.find()
 > db.task.insert(<EXPLOIT>)
 ```
-
-
 
 ## NSLookup
 
@@ -358,7 +359,7 @@ curl -u <USER> <IP> --data-binary <PAYLOAD>
         Send specified data in POST request. Details provided below.
 
 `-f, --fail`
-        Fail silently (don't output HTML error form if returned). 
+        Fail silently (don't output HTML error form if returned).
 
 `-F, --form <name=content>`
         Submit form data.
@@ -395,7 +396,7 @@ curl -u <USER> <IP> --data-binary <PAYLOAD>
         Make curl display information on stdout after a completed transfer. See man page for more details on
         available variables. Convenient way to force curl to append a newline to output: `-w "\n"` (can add
         to `~/.curlrc`).
-        
+
 `-X, --request`
         The request method to use.
 
@@ -423,11 +424,11 @@ For sending data with POST and PUT requests, these are common `curl` options:
  * content type header
   * `-H "Content-Type: application/x-www-form-urlencoded"`
   * `-H "Content-Type: application/json"`
- 
+
 * data
   * form urlencoded: `-d "param1=value1&param2=value2"` or `-d @data.txt`
   * json: `-d '{"key1":"value1", "key2":"value2"}'` or `-d @data.json`
-  
+
 ### Examples
 
 #### POST application/x-www-form-urlencoded
@@ -441,15 +442,15 @@ explicit:
     curl -d "param1=value1&param2=value2" -H "Content-Type: application/x-www-form-urlencoded" -X POST http://localhost:3000/data
 
 with a data file
- 
+
     curl -d "@data.txt" -X POST http://localhost:3000/data
 
 #### POST application/json
 
     curl -d '{"key1":"value1", "key2":"value2"}' -H "Content-Type: application/json" -X POST http://localhost:3000/data
-    
+
 with a data file
- 
+
     curl -d "@data.json" -X POST http://localhost:3000/data
 
 
@@ -544,6 +545,13 @@ Ping scan:
 ```sh
 for i in `seq 1 254`; do ping 192.168.1.$i; done
 ```
+
+Find SUID/SGID files:
+
+```sh
+find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null
+```
+
 #### Automation
 
 * [Linux Exploit Suggester 2](https://github.com/jondonas/linux-exploit-suggester-2)
