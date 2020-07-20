@@ -648,6 +648,15 @@ Ping scan:
 C:\> for \L %I in (1,1,254) do ping -w 30 -n 1 192.168.1.%I | find "Reply" >> output.txt
 ```
 
+Look for passwords:
+
+```
+reg query HKLM /f password /t REG_SZ /s
+reg query HKCU /f password /t REG_SZ /s
+dir /s *pass* == *.config
+findstr /si password *.xml *.ini *.txt
+```
+
 #### Automation
 
 * [WinPeas](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
