@@ -277,6 +277,10 @@ after you got credentials.
 
 # Exploitation
 
+## Bruteforcing
+
+Check [hacktricks](https://book.hacktricks.xyz/brute-force) for tips and commands.
+
 ## Searchsploit
 
 Basic usage:
