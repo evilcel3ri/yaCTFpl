@@ -244,6 +244,19 @@ mongo -u <USER> -p <PASSWORD> <HOST:PORT/DB>
 > db.task.insert(<EXPLOIT>)
 ```
 
+**MSQL**:
+
+Load external file into db:
+
+```sql
+load data infile '/etc/passwd/'
+# load data local infile "../index.php"
+into table test
+fields terminated by "/n"
+```
+
+Disable security in the configuration: `secure-file-priv = ""` and enable local files if necessary: `SET GLOBAL local_infile=1;`
+
 ## NSLookup
 
 Basic lookup:
