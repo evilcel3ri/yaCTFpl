@@ -144,7 +144,7 @@ dnsrecon -d <DOMAIN>
 * enumerate subdomains:
 
 ```sh
-amass -v -d <DOMAIN>
+amass enum --passive -d <DOMAIN>
 sublist3r -d <DOMAIN> -t 3 -e bing
 ```
 
@@ -217,9 +217,18 @@ Basic scan:
 
 ```sh
 nbtscan <IP>
+nbtscan -O <FILE> <IP>
+# generate an HTTP header
+nbtscan -H
+# Turns off this inverse name lookup, for hanging resolution
+nbtscan -n
+# PORT target(s) - This allows specification of a UDP port number to be used as the source in sending a query
+nbtscan -p
 ```
 
 * SMB
+
+Check up smb4k
 
 List services available:
 
@@ -244,6 +253,8 @@ Basic connection:
 
 ```sh
 smbclient //<IP>/<PATH> -U <USER> -P <PASSWORD>
+# Anonymous connection
+smbclient //<IP>/<PATH> -N
 ```
 
 
@@ -269,6 +280,10 @@ nmap -sV --script=nfs-showmount <target>
 mkdir temp
 mount -o nolock IP:/ $PWD/temp
 mount -o rw,vers=2 <target>:<share> <local_directory>
+# Mount Windows CIFS / SMB share on Linux at /mnt/cifs if you remove password it will prompt on the CLI (more secure as it wont end up in bash_history)
+mount -t cifs -o username=user,password=pass,domain=<DOMAIN> //<IP>/share-name /mnt/cifs
+# Mount a Windows share on Windows from the command line
+net use Z: \win-server\share password /user:domain\janedoe /savecred /p:no
 # add a user if you can
 groupadd --gid 1337 pwn
 useradd --uid 1337 -g pwn pwn
@@ -288,6 +303,8 @@ sudo nmap -sU -sV -sC --open -p 161 <IP>
 snmp-check <IP>
 onesixtyone -c /usr/share/seclists/Discovery/SNMP/common-snmp-community-strings.txt <IP>
 snmpwalk -v1 -c public <IP>
+# Enmerate users from SNMP
+python /usr/share/doc/python-impacket-doc/examples/samrdump.py SNMP <IP>
 ```
 
 
@@ -356,6 +373,12 @@ Management system. You can use
 after you got credentials.
 
 [Go to Post-Exploitation](#post-exploitation)
+
+## Automation
+
+```sh
+enum4linux -a <IP>
+```
 
 # Exploitation
 
@@ -727,6 +750,7 @@ Network discovery:
 C:\> net view /all
 C:\> net view \\<Hostname>
 C:\> net users
+C:\> net users /domain
 ```
 
 Ping scan:
@@ -768,6 +792,16 @@ cat /etc/shadow
 cat /etc/*-release
 sudo -l
 ps -aux
+netstat -tulpn
+watch ss -stulp
+lsof -i
+# show last logged users
+last
+df -h
+# reset pw in one line
+echo "user:pass" | chpasswd
+# list users
+getent passwd
 ```
 
 Run a command as a user:
@@ -880,10 +914,34 @@ ssh -N -D 127.0.0.1:8888 <user@address>
 
 ## Cracking
 
-Decompress with tar:
+Decompress things:
 
 ```sh
+tar xf archive.tar
+tar xvzf archive.tar.gz
+tar xjf archive.tar.bz2
+tar xtvf file.tar.gz | grep <WORD>
 tar -C <DEST> -xvf <FILE>
+unzip archive.zip
+gzip -d archive.gz
+
+# read a gz file without decompressing
+zcat archive.gz
+zless archive.gz
+zgrep <WORD> /var/log/mailliog*.gz
+
+# Search instide a zip archive
+zipgred *.txt archive.zip
+```
+
+Compress things:
+
+```sh
+zip -r file.zip /dir/*
+tar cf archive.tar files
+tar czf archive.tar.gz files
+tar cjf archive.tar.bz2 files
+gzip file
 ```
 
 ### John
@@ -920,11 +978,16 @@ hydra -l user -P passlist.txt ftp://192.168.0.1
 hydra -L userlist.txt -p defaultpw imap://192.168.0.1/PLAIN
 hydra -C defaults.txt -6 pop3s://[fe80::2c:31ff:fe12:ac11]:143/TLS:DIGEST-MD5
 hydra -L users.txt -P pass.txt <IP> -s <PORT> http-post-form "/users/sign_in:user[email]=^USER^&user[password]=^PASS^&user[Commit]=Log inn:Invalid Email or password.
+hydra -P /usr/share/wordlistsnmap.lst <IP> smtp -V
 ```
 
 ### Binwalk
 
 ### Steghide
+
+```sh
+steghide extract -sf <FILE>
+```
 
 ### Fcrackzip
 
@@ -943,6 +1006,25 @@ Put them in your `.aliases` file and source it in your `.bashrc` or `.zshrc`.
 ```sh
 alias serve='ruby -run -e httpd . -p 8000'
 alias grepip='grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"'
+```
+
+## Misc
+
+Disable bash history logging:
+
+```sh
+unset HISTORYFILE
+```
+
+File authorizations in Linux:
+
+```sh
+777 rwxrwxrwx No restriction, global WRX any user can do anything.
+755 rwxr-xr-x Owner has full access, others can read and execute the file.
+700 rwx------ Owner has full access, no one else has access.
+666 rw-rw-rw- All users can read and write but not execute.
+644 rw-r--r-- Owner can read and write, everyone else can read.
+600 rw------- Owner can read and write, everyone else has no access.
 ```
 
 # Sources
