@@ -657,10 +657,12 @@ curl -u <USER> <IP> --data-binary <PAYLOAD>
 ### POST
 
 When sending data via a POST or PUT request, two common formats (specified via the `Content-Type` header) are:
+
   * `application/json`
   * `application/x-www-form-urlencoded`
 
 Many APIs will accept both formats, so if you're using `curl` at the command line, it can be a bit easier to use the form urlencoded format instead of json because
+
   * the json format requires a bunch of extra quoting
   * curl will send form urlencoded by default, so for json the `Content-Type` header must be explicitly set
 
@@ -824,10 +826,212 @@ Ping scan:
 for i in `seq 1 254`; do ping 192.168.1.$i; done
 ```
 
+#### General find:
+
+* `-L`: follow symbolic links
+
+File types:
+
+* f: a regular file
+* d: directory
+* l: symbolic link
+* c: character devices
+* b: block devices
+* p: named pipe (FIFO)
+* s: socket
+
+Options:
+
+* -amin n: The file was last accessed n minutes ago.
+* -anewer: The file was last accessed more recently than it was modified.
+* -atime n: The file was last accessed more n days ago.
+* -cmin n: The file was last changed n minutes ago.
+* -cnewer: The file was last changed more recently than the file was modified.
+* -ctime n: The file was last changed more than n days ago.
+* -empty: The file is empty.
+* -executable: The file is executable.
+* -false: Always false.
+* -fstype type: The file is on the specified file system.
+* -gid n: The file belongs to group with the ID n.
+* -group groupname: The file belongs to the named group.
+* -ilname pattern: Search for a symbolic line but ignore the case.
+* -iname pattern: Search for a file but ignore the case.
+* -inum n: Search for a file with the specified node.
+* -ipath path: Search for a path but ignore the case.
+* -iregex expression: Search for an expression but ignore the case.
+* -links n: Search for a file with the specified number of links.
+* -lname name: Search for a symbolic link.
+* -mmin n: The file data was last modified n minutes ago.
+* -mtime n: The file data was last modified n days ago.
+* -name name: Search for a file with the specified name.
+* -newer name: Search for a file edited more recently than the file given.
+* -nogroup: Search for a file with no group id.
+* -nouser: Search for a file with no user attached to it.
+* -path path: Search for a path.
+* -readable: Find files that are readable.
+* -regex pattern: Search for files matching a regular expression.
+* -type type: Search for a particular type.
+* -uid uid: The file numeric user id is the same as the uid.
+* -user name: The file is owned by the user that is specified.
+* -writable: Search for files that can be written to.
+
+##### Find (by permissions)
+
 Find SUID/SGID files:
 
 ```sh
 find / -type f -a \( -perm -u+s -o -perm -g+s \) -exec ls -l {} \; 2> /dev/null
+find / -perm /u=s
+find / -perm /g=s
+find / -perm 2644
+find / -perm 1551
+find . -type f -perm 0777 -print
+find / -type f ! -perm 777
+```
+
+
+Find read only files:
+
+```sh
+find / -perm /u=r
+find / -perm /a=x
+```
+
+Find all 777 permission files and use chmod command to set permissions to 644:
+
+```sh
+find / -type f -perm 0777 -print -exec chmod 644 {} \;
+```
+
+##### Find (and execute)
+
+For example to delete all files ending with .temp from the /var/log/ you would use:
+
+```sh
+find /var/log/ -name `*.temp` -delete
+```
+
+Find and remove single File:
+
+```sh
+find . -type f -name "tecmint.txt" -exec rm -f {} \;
+```
+
+Find and remove Multiple File:
+
+```sh
+find . -type f -name "*.txt" -exec rm -f {} \;
+find . -type f -name "*.mp3" -exec rm -f {} \;
+```
+
+Send output from the find command to a file:
+
+```sh
+find / -name *.mp3 -fprint nameoffiletoprintto
+```
+
+Find and execute a command against a file:
+
+```sh
+# Search and edit a file at the same time
+find / -name filename -exec nano '{}' \;
+```
+
+##### Find (user based)
+
+Find single files based on user:
+
+```sh
+find / -user root -name file.txt
+```
+
+Find all files based on group:
+
+```sh
+find /home -group developer
+```
+
+Find Particular Files of User:
+
+```sh
+find /home -user tecmint -iname "*.txt"
+```
+
+##### Find (time based)
+
+Find last 50 days modified files:
+
+```sh
+find / -mtime 50
+```
+
+Find last 50 days accessed files:
+
+```sh
+find / -atime 50
+```
+
+Find Last 50-100 Days Modified Files:
+
+```sh
+find / -mtime +50 –mtime -100
+```
+
+Find Changed Files in Last 1 Hour:
+
+```sh
+find / -mmin -60
+```
+
+Find Accessed Files in Last 1 Hour:
+
+```sh
+find / -amin -60
+```
+
+##### Find (size based)
+
+* b: 512-byte blocks (default)
+* c: bytes
+* w: two-byte words
+* k: Kilobytes
+* M: Megabytes
+* G: Gigabytes
+
+Find Size between 50MB – 100MB:
+
+```sh
+find / -size +50M -size -100M
+```
+
+Find and Delete 100MB Files:
+
+```sh
+find / -type f -size +100M -exec rm -f {} \;
+```
+
+Find Specific Files and Delete:
+
+```sh
+find / -type f -name *.mp3 -size +10M -exec rm {} \;
+```
+
+Find all emtpy files:
+
+```sh
+find /tmp -type f -empty
+```
+
+Find all empty directories:
+
+```sh
+find /tmp -type d -empty
+```
+
+Find all hidden files:
+
+```sh
+find /tmp -type f -name ".*"
 ```
 
 #### Automation
