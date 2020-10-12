@@ -356,6 +356,37 @@ fields terminated by "/n"
 
 Disable security in the configuration: `secure-file-priv = ""` and enable local files if necessary: `SET GLOBAL local_infile=1;`
 
+
+#### Port 5985
+
+If this port is open, it's possible there is an instance of Windows Remove
+Management system. You can use
+[EvilRM](https://github.com/Hackplayers/evil-winrm) to connect to the target
+after you got credentials.
+
+[Go to Post-Exploitation](#post-exploitation)
+
+#### Port 8080
+
+By default, Tomcat can run on port 8080. If this is the case, there are a couple
+of exploitation you might look into:
+
+* bruteforce:
+
+You can find this script in the subfolder scripts in this repo.
+
+```sh
+ruby tomcat-brute.rb -w tomcat-betterdefaultpasslist.txt -H 10.10.10.95 -P 8080
+```
+
+[Hackingarticles.in](https://www.hackingarticles.in/multiple-ways-to-exploit-tomcat-manager/) has listed a couple of other techniques (some of them are modules in Metasploit):
+
+* Tomcat Manager Authenticated Upload Code Execution
+* Tomcat War Deployer Script
+
+If you have access to the manager and can upload a file, you can use this
+webshell: [https://raw.githubusercontent.com/tennc/webshell/master/jsp/jspbrowser/Browser.jsp](https://raw.githubusercontent.com/tennc/webshell/master/jsp/jspbrowser/Browser.jsp)
+
 ## NSLookup
 
 Basic lookup:
@@ -377,15 +408,6 @@ Zone transfert:
 ```sh
 host -l <DOMAIN> <IP>
 ```
-
-#### Port 5985
-
-If this port is open, it's possible there is an instance of Windows Remove
-Management system. You can use
-[EvilRM](https://github.com/Hackplayers/evil-winrm) to connect to the target
-after you got credentials.
-
-[Go to Post-Exploitation](#post-exploitation)
 
 ## Automation
 
@@ -1061,6 +1083,9 @@ find /tmp -type f -name ".*"
 * MySQL running as root? [`raptor_udf2.c`](https://github.com/1N3/PrivEsc/blob/master/mysql/raptor_udf2.c)
 * [Monitor linux processes without root permissions](https://github.com/DominicBreuker/pspy)
 
+If you are on a modern ubuntu, there is a Privesc vector through the USB creator
+program: [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/](https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalation-in-ubuntu-desktop/)
+
 ### Send files to remote hosts
 
 #### One-line web client
@@ -1249,6 +1274,10 @@ Run as dictionnary mode, try to decompress the target:
 ```sh
 fcrackzip -u -D -p <Wordlist> <FILE>
 ```
+
+### Uncipher stuff
+
+Handy tool for RSA: [RsaCTFTool](https://github.com/Ganapati/RsaCtfTool)
 
 # Exfiltration
 
