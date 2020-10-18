@@ -1108,11 +1108,6 @@ program: [https://unit42.paloaltonetworks.com/usbcreator-d-bus-privilege-escalat
 
 ### Send files to remote hosts
 
-#### One-line web client
-
-```powershell
-```
-
 #### Powershell
 
 ```powershell
@@ -1451,6 +1446,36 @@ ls -la /tmp | more
 less /tmp
 ls -la /tmp | grep xxx
 ```
+
+# Reverse
+
+## radare2 suite
+
+([Source](https://www.megabeets.net/a-journey-into-radare-2-part-1/))
+
+Get information about the binary:
+
+```sh
+rabin2 -v BIN
+```
+
+* by default r2 doesn't analyse the binary, you can do it with `aa` or `aaa`
+* (check `aa?` for help and information about the commands) it is also possible to analyse the entire binary straigth away with `r2 -A vuln`
+* flags are interesting offset of the binary, such as Sections, Functions, Symbols and Strings, you can list them with `fs` and check some of them with `fs <section>` and use `f` to print the flags it contains ex: `fs imports;f`
+* to list all functions: `afl`
+* `iz` lists strings in data sections and `izz` search for strings in the whole binary
+* `axt` stands for analyse x-refs to
+* This command reveals us more of radare2 features. The `axt` command is used to "find data/code references to this address" (see ax?). The special operator @@ is like a foreach iterator sign, used to repeat a command over a list of offsets (see @@?), and `str.*` is a wildcard for all the flags that start with str.. This combination helps us not just to list the strings flags but also to list the function name, where they are used and the referencing instruction. Make sure to select the strings flagspace (default, use `fs *`) before.
+* to find a function or go somewhere, you can use `s` (seek). Ex: `s main` (your hex address will change and you will be in the main function)
+* to dissassemble: `pdf`. Whole sequence: `s main; pdf`
+* radare2 is equipped with a very strong and efficient suite of Visual Modes. The Visual Mode is much more user-friendly and takes the reversing experience using r2 to a whole new level. Pressing V will bring us to the Visual Mode screen. Use p/P to change between modes. At the top of the screen you can see the command which was used to generate the view. Navigate to the disassembly view using p. To go back from a specific screen, press q.
+* reopen in debug mode: `ood` and `dc` for debug continue
+* `dr` to show register and give: `dr rip` for a specific register
+* use x/X to list the references to/from (respectively) the current offset. Use the numbers to jump to a reference.
+radare2 commands
+* use :command to execute r2 commands from inside Visual Mode. This is similar to VIM.
+* you can add a comment using ;<comment> followed by Enter, remove it using ;- or even use your default text editor to add the comment using ;!.
+* m<key> can be used to mark specific offset with a key of your choice. Press '<key> to go to your key. This helps to mark some key addresses that you’d like to quickly navigate to.
 
 # Custom Scripts
 
