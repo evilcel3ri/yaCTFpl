@@ -1515,6 +1515,18 @@ Remove blank lines:
 :g/^$/d
 ```
 
+Remove return carriage:
+
+```
+%s/^M//g
+```
+
+Replace something:
+
+```
+%s/origin/destination/g
+```
+
 Sort lines:
 
 ```
