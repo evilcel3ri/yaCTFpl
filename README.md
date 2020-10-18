@@ -1,5 +1,7 @@
 # Yet Another CTF Playbook
 
+![](tooshorttortfm.png)
+
 ## What?
 
 The goal of this manual is to gather common attack and recon techniques
