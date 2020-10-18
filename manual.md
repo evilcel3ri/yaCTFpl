@@ -1507,6 +1507,27 @@ File authorizations in Linux:
 600 rw------- Owner can read and write, everyone else has no access.
 ```
 
+## (n)Vim tricks
+
+Remove blank lines:
+
+```
+:g/^$/d
+```
+
+Sort lines:
+
+```
+CTRL-V and select lines or do ggVG
+:sort
+
+For invert sort:
+:%sort!
+
+For numerical sort:
+:sort n
+```
+
 # Sources
 
 ## Books
