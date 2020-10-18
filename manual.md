@@ -1,12 +1,12 @@
 ---
 title: Yet Another CTF Playbook
-subtitle: Version 1
+subtitle: Version 2
 author:
     - christalib
-date: June/September 2020
+date: June/October 2020
 titlepage: true
-titlepage-color: ffffff
-urlcolor: #370000
+titlepage-color: 3b9cff
+urlcolor: #ee3e37
 titlepage-rule-color: 370000
 titlepage-text-color: 000000
 table-of-contents: true
