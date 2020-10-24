@@ -183,6 +183,11 @@ file:
 * Directory Traversal ([Path traversal list windows](https://gracefulsecurity.com/path-traversal-cheat-sheet-windows/) and [path traversal list linux](https://gracefulsecurity.com/path-traversal-cheat-sheet-linux/))
 * Default credentials (admin:admin, root:root... Check also the name of the service or the default password for the running application.)
 * if CGI-bin, check for Shellshock (TODO)
+* If GraphQL, this query describes the whole schema:
+
+```graphql
+"query IntrospectionQuery { __schema { queryType { name } mutationType { name } subscriptionType { name } types { ...FullType } directives { name description locations args { ...InputValue } } } } fragment FullType on __Type { kind name description fields(includeDeprecated: true) { name description args { ...InputValue } type { ...TypeRef } isDeprecated deprecationReason } inputFields { ...InputValue } interfaces { ...TypeRef } enumValues(includeDeprecated: true) { name description isDeprecated deprecationReason } possibleTypes { ...TypeRef } } fragment InputValue on __InputValue { name description type { ...TypeRef } defaultValue } fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name } } } } } } } }"
+```
 
 [Go to Exploitation](#exploitation)
 
