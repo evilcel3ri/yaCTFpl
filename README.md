@@ -38,3 +38,7 @@ common tools on Kali Linux or Parrot. If you just started doing CTF (especially
 Hack The Box ones), you might use this work as a base for your learning.
 
 Feel free to open issues in case you have any inquiry!
+
+## I want more! (and I like using the terminal!)
+
+In parallel of this manual, you can use Tek's [tips](https://github.com/christalib/tips?organization=christalib&organization=christalib) small program which displays handy tips about a lot of commands! You can find my fork of those commands [here](https://github.com/christalib/commands-for-sec).
