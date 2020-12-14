@@ -17,6 +17,24 @@ toc-title: "Table of Contents"
 
 # Reconnaissance
 
+## OSINT
+
+### Find accounts online
+
+* Sherlock: [https://github.com/sherlock-project/sherlock](https://github.com/sherlock-project/sherlock)
+* TheHarvester: [https://github.com/laramies/theHarvester](https://github.com/laramies/theHarvester)
+* WhatsMyName: [https://github.com/WebBreacher/WhatsMyName](https://github.com/WebBreacher/WhatsMyName)
+
+### Crawl publicly available databases
+
+* Dehashed: [https://dehashed.com/](https://dehashed.com/)
+* Scylla: [https://scylla.sh/api](https://scylla.sh/api)
+
+### Reverse look images
+
+* [Online exiftool](http://exif.regex.info/exif.cgi)
+* Yandex, Google Images, Bing Images, Tiny Eye
+
 ## Nmap
 
 Quickstart:
@@ -998,7 +1016,6 @@ find . -type f -perm 0777 -print
 find / -type f ! -perm 777
 ```
 
-
 Find read only files:
 
 ```sh
@@ -1304,6 +1321,7 @@ Check: https://github.com/p3nt4/Invoke-SocksProxy
 ### Bypass Applocker
 
 * Rundll32
+
 ```powershell
 rundll32.exe PowerShdll.dll,main
 ```
