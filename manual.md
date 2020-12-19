@@ -3,7 +3,7 @@ title: Yet Another CTF Playbook
 subtitle: Version 2
 author:
     - christalib
-date: June/October 2020
+date: June/December 2020
 titlepage: true
 titlepage-color: 3b9cff
 urlcolor: #ee3e37
@@ -1607,7 +1607,7 @@ ls -la /tmp | grep xxx
 
 ## radare2 suite
 
-([Source](https://www.megabeets.net/a-journey-into-radare-2-part-1/))
+([Source](https://www.megabeets.net/a-journey-into-radare-2-part-1/) and [also](https://insinuator.net/2016/08/reverse-engineering-with-radare2-intro/))
 
 Get information about the binary:
 
@@ -1616,15 +1616,21 @@ rabin2 -I BIN # general info
 rabin2 -i BIN # imports
 rabin2 -s BIN # symbols
 rabin2 -z BIN # strings
+rax2 # used of hex, int and other dataformats
+radiff2 # diffing
+rahash2 # create hashes from file blocks
+rasm2 # play with asm function
 ```
 
 * by default r2 doesn't analyse the binary, you can do it with `aa` or `aaa`
-* (check `aa?` for help and information about the commands) it is also possible to analyse the entire binary straigth away with `r2 -A vuln`
+* (check `aa?` for help and information about the commands) it is also possible to analyse the entire binary straigth away with `r2 -A vuln` or `r2 -c=H vuln` for the webinterface.
 * flags are interesting offset of the binary, such as Sections, Functions, Symbols and Strings, you can list them with `fs` and check some of them with `fs <section>` and use `f` to print the flags it contains ex: `fs imports;f`
 * to list all functions: `afl`
 * to list all imports: `ii`
 * `iz` lists strings in data sections and `izz` search for strings in the whole binary
 * `axt` stands for analyse x-refs to
+* use `s fcn.00501510` and `afn funcname` to rename functions or `afn name
+  fcn.00401510` You can use and address too.
 * This command reveals us more of radare2 features. The `axt` command is used to "find data/code references to this address" (see ax?). The special operator @@ is like a foreach iterator sign, used to repeat a command over a list of offsets (see @@?), and `str.*` is a wildcard for all the flags that start with str.. This combination helps us not just to list the strings flags but also to list the function name, where they are used and the referencing instruction. Make sure to select the strings flagspace (default, use `fs *`) before.
 * to find a function or go somewhere, you can use `s` (seek). Ex: `s main` (your hex address will change and you will be in the main function)
 * to dissassemble: `pdf`. Whole sequence: `s main; pdf`
