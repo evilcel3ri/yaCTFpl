@@ -104,6 +104,24 @@ nmap <IP> -oA <FILE> # all formats
 $_ is open!"} 2>$null
 ```
 
+Basic Powershell commands:
+
+| bash | powershell             | options |
+|------|------------------------|---------|
+| `cd` | `Set-Location`         |         |
+| `ls` | `Get-ChildItem`        | `-Path`, `-File/Directory`, `-Filter`, `-Recurse`, `-Hidden`, `-ErrorAction SilentlyContinue` |
+| `wc` | `Measure-Object -word` |         |
+
+
+Get the size of a file: `Measure-Object`
+
+Find a string in a file/directory:
+
+`Select-String -Path /path/ -Pattern '*.pdf'`
+
+Never forget: `Get-Help COMMAND`
+
+
 ### Analysing results
 
 #### Port 21 open
