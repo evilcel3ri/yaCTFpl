@@ -106,11 +106,12 @@ $_ is open!"} 2>$null
 
 Basic Powershell commands:
 
-| bash | powershell             | options |
-|------|------------------------|---------|
-| `cd` | `Set-Location`         |         |
-| `ls` | `Get-ChildItem`        | `-Path`, `-File/Directory`, `-Filter`, `-Recurse`, `-Hidden`, `-ErrorAction SilentlyContinue` |
-| `wc` | `Measure-Object -word` |         |
+| bash  | powershell             | options |
+|-------|------------------------|---------|
+| `cd`  | `Set-Location`         |         |
+| `ls`  | `Get-ChildItem`        | `-Path`, `-File/Directory`, `-Filter`, `-Recurse`, `-Hidden`, `-ErrorAction SilentlyContinue` |
+| `wc`  | `Measure-Object -word` |         |
+| `cat` | `Get-Content`          | `-Path` |
 
 
 Get the size of a file: `Measure-Object`
@@ -1622,6 +1623,15 @@ ls -la /tmp | grep xxx
 ```
 
 # Reverse
+
+## Powershell
+
+```powershell
+Get-FileHash -Algorithm MD5 file.exe
+strings.exe -accepteula file.exe
+Get-Item -Path file.exe -Stream *
+wmic process call create $(Resolve-Path file.exe:streamname)
+```
 
 ## radare2 suite
 
