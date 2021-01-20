@@ -1676,6 +1676,67 @@ radare2 commands
 * you can add a comment using ;<comment> followed by Enter, remove it using ;- or even use your default text editor to add the comment using ;!.
 * m<key> can be used to mark specific offset with a key of your choice. Press '<key> to go to your key. This helps to mark some key addresses that you’d like to quickly navigate to.
 
+
+More keybindings:
+
+```
+iS # show sections
+ie # list entry points
+pdb # show basic block disass
+afa # show func arguments
+afv # show func variables
+afvn # rename func variables
+afvt # set function variables type
+af # add/analyse function
+CC! # add comment
+CC <text> # append comment
+CC. # show comment
+CCf # show comment in this function
+
+V # enter visual mode
+
+# in visual mode
+v # select function variable, xref
+_ <search string> # quicksearch
+c # show cursor
+d # set function name
+; # add comment
+;- # remove comment
+
+VV # enter graph mode
+
+p/P # cycle through graph types
+g<identifier> # seek function
+u # undo seek
+' # show comments
+/ # add comment
+??? # select byteblock
+tab # seek to nextyteblock
+TAB # seek to previousyteblock
+
+# in conditional branchs
+t # to go to True
+f # to go to False
+```
+
+Some stolen config from [https://gist.github.com/williballenthin/6857590dab3e2a6559d7](https://gist.github.com/williballenthin/6857590dab3e2a6559d7).
+
+In `~/.radare2rc`:
+
+```
+# Show comments at right of disassembly if they fit in screen
+e asm.cmt.right=true
+
+# Shows pseudocode in disassembly. Eg mov eax, str.ok = > eax = str.ok
+e asm.pseudo = true
+
+# Ayu theme
+eco ayu
+
+# Use UTF-8 to show cool arrows that do not look like crap :)
+e scr.utf8 = true
+```
+
 # Custom Scripts
 
 ## Aliases
