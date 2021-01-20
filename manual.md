@@ -1680,18 +1680,33 @@ radare2 commands
 More keybindings:
 
 ```
+/ # search string
+/R # search ROP gadget
+/R/ # search ROP gadget with regex
+
+
 iS # show sections
+iS | grep perm=..w # show writable sections
+iS | grep perm=..x # show executable sections
 ie # list entry points
+
 pdb # show basic block disass
+pdf @ [offset|funcname] # disass a function
+
+afi # get function information
 afa # show func arguments
 afv # show func variables
 afvn # rename func variables
 afvt # set function variables type
 af # add/analyse function
+
 CC! # add comment
 CC <text> # append comment
 CC. # show comment
 CCf # show comment in this function
+
+axt [offset|funcname] | find xref of a function
+is~imp. # list libc imports
 
 V # enter visual mode
 
@@ -1719,6 +1734,44 @@ t # to go to True
 f # to go to False
 ```
 
+**PWN Specicic**
+
+```
+ragg2 -P SIZE -r # generate cyclical pattern
+wop0 $VALUE # find offset at pattern
+
+e search.roplean = 4 # change the deep of the rop search
+fd [offset|funcname] # computing how far a symbol is from where you currently
+are
+
+i~canary # find canaries
+i~pic # for position independant code
+i~nc # for non executable stack
+
+aei # initialize emulation
+aed # deinitialize emulation
+aef # emulate a whole function
+aes # single step
+
+pxw [len] [@ offset] # hexdump
+?v sym.main # get offset of a symbol
+~fcn # to grep for fcn
+j # append to get json data: ij, pdfj,  /Rj...
+
+? 0x20 + 0x402a0 # calculus of offsets
+```
+
+**Debug**
+
+```
+r2 -D gdb -d binary gdb://addr:port
+dr= # show registers
+dcs* # emulate strace
+pd [len] @ eax # disass at register eax
+```
+
+[SOURCE](https://radareorg.github.io/blog/posts/using-radare2/)
+
 Some stolen config from [https://gist.github.com/williballenthin/6857590dab3e2a6559d7](https://gist.github.com/williballenthin/6857590dab3e2a6559d7).
 
 In `~/.radare2rc`:
@@ -1736,6 +1789,7 @@ eco ayu
 # Use UTF-8 to show cool arrows that do not look like crap :)
 e scr.utf8 = true
 ```
+
 
 # Custom Scripts
 
