@@ -3,7 +3,7 @@ title: Yet Another CTF Playbook
 subtitle: Version 2
 author:
     - christalib
-date: June/December 2020
+date: June/February 2021
 titlepage: true
 titlepage-color: 3b9cff
 urlcolor: #ee3e37
@@ -1623,6 +1623,21 @@ ls -la /tmp | grep xxx
 ```
 
 # Reverse
+
+## tricks
+
+Print a decimal value in little endian:
+
+```python
+import struct
+struct.pack('<i', 123456789)
+```
+
+Print hexcode into stdin:
+
+```bash
+echo -n -e "\x12\x34\x56"
+```
 
 ## Powershell
 
