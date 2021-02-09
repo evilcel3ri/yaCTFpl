@@ -1930,6 +1930,12 @@ For numerical sort:
 :sort n
 ```
 
+Delete duplicated lines:
+
+```
+:g/^\(.*\)$\n\1/d
+```
+
 # Sources
 
 ## Books
