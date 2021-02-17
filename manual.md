@@ -1681,6 +1681,15 @@ ls -la /tmp | grep xxx
 
 ## Windows
 
+### Users:
+
+```cmd
+net users
+net localgroup users
+net localgroup administrators
+net user NAME | findstr /B /C:"Last logon"
+```
+
 ```cmd
 net view \\127.0.0.1 # shares
 net session # sessions
@@ -1689,17 +1698,19 @@ nbstat -s # netbios TCP/IP activity
 nbstat -na # unusual TCP/UDP port listening
 ```
 
-Tasks:
+### Tasks:
 
 ```cmd
 tasklist /v
 wmic process list full
+wmic startup list full
 wmic process get name,parentprocessid,processid
 tasklist /m /fi "pid eq PID"
 wmic process where processid=PID get commandline
 ```
+Check scheduled tasks: https://blog.malwarebytes.com/cybercrime/2015/03/scheduled-tasks/
 
-Services:
+### Services:
 
 ```cmd
 services.msc
@@ -1711,9 +1722,46 @@ tasklist /svc
 Check services listening to ports:
 
 ```cmd
-netstat -nao | find "ESTABLISHED"
+netstat -nao | findstr /B /C "ESTABLISHED"
 tasklist /fi "pid eq PID"
 tasklist /fi "pid eq PID" /m # get list of modules
+```
+
+Check past connections: File explorer > search for "hosts".
+
+### Keys
+
+```powershell
+Get-ChildItem -Path Registry::HKEY_CURRENT_USER
+```
+
+## Yara
+
+Cheatsheet: [https://medium.com/malware-buddy/security-infographics-9c4d3bd891ef#18dd](https://medium.com/malware-buddy/security-infographics-9c4d3bd891ef#18dd)
+
+* Meta: descriptive information about the rule
+* Strings: define specific strings you want to search in the binaries
+
+Ex: 
+
+```yara
+rule {
+        strings: 
+                $hello_world = "hello world!"
+        
+        condition: 
+                $hello_world
+}
+```
+
+*Note*: yara is truthy
+
+* Conditions: true, any of them (any of the variables), <=, >=, !=... Those can be combined with boolean: and, not, or 
+
+Generate rules with: 
+
+```sh
+yarGen.py -m FILE --excludegood -o OUPUT_RULE
 ```
 
 # Reverse
@@ -2047,9 +2095,10 @@ Delete duplicated lines:
 * [LOLBas](https://lolbas-project.github.io/#)
 * [Net Security](https://net-security.fr/security/commandes-gnu-linux-pour-detecter-une-intrusion/)
 * [PenstestMonkey](http://pentestmonkey.net/)
+* [Pentest Compilation](https://github.com/adon90/pentest_compilation)
 * [Red Teaming Experiments](https://ired.team/)
 * [Security Ramblings](https://cas.vancooten.com/posts/2020/05/oscp-cheat-sheet-and-command-reference/#reconnaissance)
-* [Pentest Compilation](https://github.com/adon90/pentest_compilation)
+* [TryHackMe](https://tryhackme.com)
 
 ## Videos
 
