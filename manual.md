@@ -897,17 +897,30 @@ General recon:
 whoami
 hostname
 systeminfo
+systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
 ipconfig /all
 netstat
+wmic csproduct get name
+wmic bios get serialnumber
+wmic computersystem list brief
+doskey /history > history.txt
 ```
 
 Network discovery:
 
 ```cmd
-C:\> net view /all
-C:\> net view \\<Hostname>
-C:\> net users
-C:\> net users /domain
+net view /all
+net view \\<Hostname>
+net users
+net users /domain
+net localgroup administrators
+net group administrators
+wmic rdtoggle list
+wmic useraccount list
+wmic group list
+wmic netlogin get name,lastlogon,badpasswordcount
+wmic netclient list brief
+
 ```
 
 Ping scan:
@@ -1543,6 +1556,8 @@ Stages:
 
 ## Linux
 
+### Users
+
 List connected users:
 
 ```sh
@@ -1585,6 +1600,8 @@ cat /etc/passwd | grep /bin/bash (ou zsh, sh, etc.)
 cat /etc/shells
 ```
 
+### Processes
+
 Check processes:
 
 ```sh
@@ -1600,10 +1617,61 @@ lsof -l
 lsof -p <PID>
 ```
 
+### Network
+
+Capture traffic on any interface from a target host and specific port and output to an file:
+
+```sh
+tcpdump -w <FILENAME>.pcap -i any dst <TARGET IP> and port 80
+```
+
+Save pcap file on rotating size:
+
+```sh
+tcpdump -n -s65353 -C 1000 -w '%host_%Y-%m-%d_%H:%M:%S.pcap'
+```
+
+Save pcap to a remote host:
+
+```sh
+tcpdump -w - | ssh <REMOTE IP> -p 50005 "cat - > /tmp/remotecapture.pcap"
+```
+
+List all current iptables rules:
+
+```sh
+iptables -L
+```
+
+Flush rules:
+
+```sh
+iptables -F
+```
+
+Export existing iptables firewall rules:
+
+```sh
+iptables-save > firewall.out
+```
+
+Restore firewall rules:
+
+```sh
+iptables-restore < firewall.out
+```
+
+Block all connections: 
+
+```sh
+iptables-policy INPUT DROP
+iptables-policy OUTPUT DROP
+iptables-policy FORWARD DROP
+```
+
 Check ports:
 
 ```sh
-
 # list TCP/UDP open ports
 
 netstat -lntup
@@ -1682,6 +1750,12 @@ ls -la /tmp | grep xxx
 ## Windows
 
 ### Users:
+
+```cmd
+psloggedon \\<COMPUTER NAME>
+
+for /L %i in (1,1,254) do psloggedon \\192.168.1.%i >> C:\users_output.txt
+```
 
 ```cmd
 net users
