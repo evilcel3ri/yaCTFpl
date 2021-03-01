@@ -3,3 +3,10 @@ https://blog.stealthbits.com/performing-domain-reconnaissance-using-powershell
 https://blog.stealthbits.com/local-admin-mapping-bloodhound
 https://blog.stealthbits.com/extracting-password-hashes-from-the-ntds-dit-file/
 https://blog.stealthbits.com/passing-the-hash-with-mimikatz
+https://ropemporium.com/guide.html#Common%20pitfalls
+https://marcoramilli.com/2021/01/09/c2-traffic-patterns-personal-notes/
+https://john-woodman.com/research/malicious-vba-macros-trials-tribulations/
+http://blog.dkbza.org/2007/03/pe-trick-thread-local-storage.html
+https://nasbench.medium.com/demystifying-the-svchost-exe-process-and-its-command-line-options-508e9114e747
+https://dfirmadness.com/incident-response-thumb-drive/
+https://tc.gts3.org/cs6265/2019/tut/tut03-02-pwntools.html
