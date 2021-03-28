@@ -1510,6 +1510,14 @@ hydra -L users.txt -P pass.txt <IP> -s <PORT> http-post-form "/users/sign_in:use
 hydra -P /usr/share/wordlistsnmap.lst <IP> smtp -V
 ```
 
+More cheats from [https://github.com/frizb/Hydra-Cheatsheet](https://github.com/frizb/Hydra-Cheatsheet)
+
+```sh
+hydra -L ./webapp.txt -P ./webapp.txt <IP> http-get /admin
+hydra -t 1 -V -f -l administrator -P /usr/share/wordlists/rockyou.txt rdp://<IP>
+hydra -l admin -P ./passwordlist.txt <IP> -V http-form-post '/wp-login.php:log=^USER^&pwd=^PASS^&wp-submit=Log In&testcookie=1:S=Location'
+```
+
 ### Binwalk
 
 ### Steghide
@@ -1661,7 +1669,7 @@ Restore firewall rules:
 iptables-restore < firewall.out
 ```
 
-Block all connections: 
+Block all connections:
 
 ```sh
 iptables-policy INPUT DROP
@@ -1816,23 +1824,23 @@ Cheatsheet: [https://medium.com/malware-buddy/security-infographics-9c4d3bd891ef
 * Meta: descriptive information about the rule
 * Strings: define specific strings you want to search in the binaries
 
-Ex: 
+Ex:
 
 ```yara
 rule {
-        strings: 
+        strings:
                 $hello_world = "hello world!"
-        
-        condition: 
+
+        condition:
                 $hello_world
 }
 ```
 
 *Note*: yara is truthy
 
-* Conditions: true, any of them (any of the variables), <=, >=, !=... Those can be combined with boolean: and, not, or 
+* Conditions: true, any of them (any of the variables), <=, >=, !=... Those can be combined with boolean: and, not, or
 
-Generate rules with: 
+Generate rules with:
 
 ```sh
 yarGen.py -m FILE --excludegood -o OUPUT_RULE
@@ -1862,6 +1870,7 @@ Get-FileHash -Algorithm MD5 file.exe
 strings.exe -accepteula file.exe
 Get-Item -Path file.exe -Stream *
 wmic process call create $(Resolve-Path file.exe:streamname)
+Get-Content -path file.exe -stream streamname
 ```
 
 ## radare2/rizin suite
