@@ -2035,6 +2035,32 @@ e scr.utf8 = true
 
 # Custom Scripts
 
+## Strings analisys
+
+List path in a pagefile:
+
+```
+strings pagefile.sys | grep -i "^[a-z]:\\\\" | sort | uniq | less
+```
+
+Search for env vars:
+
+```
+strings pagefile.sys | grep -i "^[a-zA-Z09_]*=.*" | sort -u | uniq | less
+```
+
+Search for URLs:
+
+```
+strings pagefile.sys | egrep "^https?://" | sort | uniq | less
+```
+
+Search for emails:
+
+```
+strings pagefile.sys | egrep '([[:alnum:]_.-]{1,64}+@[[:alnum:]_.-]{2,255}+?\.[[:alpha:].]{2,4})' 
+```
+
 ## Aliases
 
 Put them in your `.aliases` file and source it in your `.bashrc` or `.zshrc`.
