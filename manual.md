@@ -1,9 +1,9 @@
 ---
 title: Yet Another CTF Playbook
-subtitle: Version 2
+subtitle: Version 3
 author:
     - christalib
-date: June/February 2021
+date: June 2020/February 2021
 titlepage: true
 titlepage-color: 3b9cff
 urlcolor: #ee3e37
@@ -2058,7 +2058,7 @@ strings pagefile.sys | egrep "^https?://" | sort | uniq | less
 Search for emails:
 
 ```
-strings pagefile.sys | egrep '([[:alnum:]_.-]{1,64}+@[[:alnum:]_.-]{2,255}+?\.[[:alpha:].]{2,4})' 
+strings pagefile.sys | egrep '([[:alnum:]_.-]{1,64}+@[[:alnum:]_.-]{2,255}+?\.[[:alpha:].]{2,4})'
 ```
 
 ## Aliases
@@ -2188,6 +2188,40 @@ Delete duplicated lines:
 :g/^\(.*\)$\n\1/d
 ```
 
+# Forensics
+
+## EnCase
+
+```
+ewfmount FILE.EO1 /DEST # mount image
+mmls /DEST #find offset
+sudo mount -o ro,loop,show_sys_files,stream_interface=windows,offset=$OFFSET_FROM_MMLS /DEST /mnt
+```
+
+## Memory
+
+### Vol2
+
+Basic plugins:
+* pstree (and -v to see the full filepath)
+* netscan
+* dumpregistry
+* hashdump
+* evtlogs
+* malfind + maldump + clamscan
+
+Ouput plugin data in a greppable format:
+
+```sh
+vol.py -f FILE.mem --profile=XYZ netscan --output-file=grep_netscan.txt --output=greptext
+```
+
+### Vol3
+
+```
+vol3 -f FILE PLUGIN
+```
+
 # Sources
 
 ## Books
@@ -2197,6 +2231,7 @@ Delete duplicated lines:
 
 ## Website
 
+* DFIR Madness
 * [Absolom.com](https://www.absolomb.com/)
 * [Blog.g0tmi1k.com](https://blog.g0tmi1k.com/)
 * [GTFObins](https://gtfobins.github.io/)
@@ -2212,3 +2247,4 @@ Delete duplicated lines:
 ## Videos
 
 * [Ippsec](https://www.youtube.com/channel/UCa6eh7gCkpPo5XXUDfygQQA)
+* Ib13 something
