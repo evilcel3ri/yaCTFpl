@@ -2188,39 +2188,7 @@ Delete duplicated lines:
 :g/^\(.*\)$\n\1/d
 ```
 
-# Forensics
 
-## EnCase
-
-```
-ewfmount FILE.EO1 /DEST # mount image
-mmls /DEST #find offset
-sudo mount -o ro,loop,show_sys_files,stream_interface=windows,offset=$OFFSET_FROM_MMLS /DEST /mnt
-```
-
-## Memory
-
-### Vol2
-
-Basic plugins:
-* pstree (and -v to see the full filepath)
-* netscan
-* dumpregistry
-* hashdump
-* evtlogs
-* malfind + maldump + clamscan
-
-Ouput plugin data in a greppable format:
-
-```sh
-vol.py -f FILE.mem --profile=XYZ netscan --output-file=grep_netscan.txt --output=greptext
-```
-
-### Vol3
-
-```
-vol3 -f FILE PLUGIN
-```
 
 # Sources
 
