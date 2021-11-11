@@ -2,7 +2,7 @@
 title: Yet Another CTF Playbook
 subtitle: Version 3
 author:
-    - christalib
+    - evilcel3ri
 date: June 2020/February 2021
 titlepage: true
 titlepage-color: 3b9cff
