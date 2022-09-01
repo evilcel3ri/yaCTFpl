@@ -3,7 +3,7 @@ title: Yet Another CTF Playbook
 subtitle: Version 3
 author:
     - evilcel3ri
-date: June 2020/February 2021
+date: June 2020 onwards
 titlepage: true
 titlepage-color: 3b9cff
 urlcolor: #ee3e37
@@ -205,6 +205,11 @@ sublist3r -d <DOMAIN> -t 3 -e bing
 * if it's a Wordpress instance look into `wpscan`
 * sometimes an open FTP is also a feature from a running IIS instance which comes with a CalDav instance. Try it out with `davtest` and exploit with `cadaver`
 * `dirsearch big.txt -e sh,txt,htm,php,cgi,html,pl,bak,old`
+
+Better crawl:
+```
+gobuster dir -w 'DICT' -x php -b 400,401,402,403,404,412,500,501,502,503 -s 200,301 --random-agent -r -u $1
+```
 
 ##### WFUZZ
 
@@ -2068,6 +2073,14 @@ Put them in your `.aliases` file and source it in your `.bashrc` or `.zshrc`.
 ```sh
 alias serve='ruby -run -e httpd . -p 8000'
 alias grepip='grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"'
+```
+
+## Find all hashes in dir and subdir
+    
+```
+find . -type f -exec sha256sum {} \; | tee sha.out
+find . -type f -exec sha512sum {} \; | tee sha.out
+find . -type f -exec md5sum {} \; | tee sha.out
 ```
 
 ## Misc
