@@ -719,6 +719,8 @@ msf>exploit -j
 
 ## cURL
 
+More: https://github.com/curl/curl-cheat-sheet
+
 Upload file:
 
 ```sh
