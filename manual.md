@@ -2207,7 +2207,7 @@ Delete duplicated lines:
 ## Grep stuff
     
 * -v: see NOT matches
-* -w: see ONLY matches
+* -o: see ONLY matches
 
 
 # Sources
