@@ -2202,7 +2202,12 @@ Delete duplicated lines:
 ```
 :g/^\(.*\)$\n\1/d
 ```
-
+    
+    
+## Grep stuff
+    
+* -v: see NOT matches
+* -w: see ONLY matches
 
 
 # Sources
