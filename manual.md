@@ -1979,6 +1979,11 @@ TAB # seek to previousyteblock
 # in conditional branchs
 t # to go to True
 f # to go to False
+
+# rename all function
+afna@@f
+# or set anal.slow=true and rerun
+# test also with decai -n but slow and experiemental AI
 ```
 
 **PWN Specicic**
