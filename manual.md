@@ -1939,6 +1939,7 @@ ie # list entry points
 
 pdb # show basic block disass
 pdf @ [offset|funcname] # disass a function
+p8 # print only bytes
 
 afi # get function information
 afa # show func arguments
@@ -1984,7 +1985,22 @@ f # to go to False
 afna@@f
 # or set anal.slow=true and rerun
 # test also with decai -n but slow and experiemental AI
+
+# fuzzy search help
+?*~...
+
+# jq like parser
+aflj~{}
+
+# run a script from r2
+. hello.r2
+#!pipe python
+then
+import r2pipe
+r2 = r2pipe.open()
+r2.cmd("p8 32")
 ```
+
 
 **PWN Specicic**
 
@@ -2083,7 +2099,7 @@ alias grepip='grep -oE "\b([0-9]{1,3}\.){3}[0-9]{1,3}\b"'
 ```
 
 ## Find all hashes in dir and subdir
-    
+
 ```
 find . -type f -exec sha256sum {} \; | tee sha.out
 find . -type f -exec sha512sum {} \; | tee sha.out
@@ -2207,10 +2223,10 @@ Delete duplicated lines:
 ```
 :g/^\(.*\)$\n\1/d
 ```
-    
-    
+
+
 ## Grep stuff
-    
+
 * -v: see NOT matches
 * -o: see ONLY matches
 
@@ -2241,3 +2257,4 @@ Delete duplicated lines:
 
 * [Ippsec](https://www.youtube.com/channel/UCa6eh7gCkpPo5XXUDfygQQA)
 * Ib13 something
+* [r2con2024 scripting with r2](https://www.youtube.com/watch?v=MZGauxMSmd0&t=2120s)
