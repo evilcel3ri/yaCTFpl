@@ -1994,11 +1994,18 @@ aflj~{}
 
 # run a script from r2
 . hello.r2
+r2 -i hello.r2
+
+# run python shell in r2
 #!pipe python
 then
 import r2pipe
 r2 = r2pipe.open()
 r2.cmd("p8 32")
+
+
+# analyse all symbols
+af @@ sym*
 ```
 
 
@@ -2036,6 +2043,93 @@ r2 -D gdb -d binary gdb://addr:port
 dr= # show registers
 dcs* # emulate strace
 pd [len] @ eax # disass at register eax
+ds # step
+dso # stepover
+dc # continue
+db # breakpoint
+dcu # continue-until
+dm # memory-maps
+dx # code-inject
+dd # file-desc
+```
+
+**mananalysis**
+
+From [Introductiory malware RE with radare sh0 @ r2con2024](https://github.com/radareorg/r2con2024/blob/main/day1-workshops/09-malware-analysis-with-radare/malware%20analysis%20wih%20radare2%20-%20r2con2024.pdf)
+```
+iS # sections
+iE # exports
+ii # imports
+is # symbols
+iz # strings
+it # hash
+il # linked libs
+
+
+# workflow
+aaaaa
+afl
+afl ~main
+afl ~entry
+s entry0
+pdf
+pdg
+
+# locating communications
+ii ~connect
+ii ~recv
+ii ~inet_addr
+ii ~gethostbyname
+ii ~InternetConnect
+ii ~InternetReadfile
+ii ~HttpSendRequest
+ii ~WinHttpConnect
+
+# packed?
+iS entropy
+axt @@ str*
+axt @@ sub*
+ii
+afl | wc -l
+
+# viewing functions
+pdf
+pdc
+pdg
+pd 10 @main
+axg
+
+# change arch
+e arch.bits=32
+e asm.bits=32
+e anal.arch=arm
+e arch.endian=little
+e ~arch
+
+# printing data
+px # print hexa bytes
+pxw # print list of 32
+pxq # print list of 64
+ps # print string
+psw # print wide string
+
+# export byte to arrays
+pc 30
+
+# define structures
+!cat person.h
+to person # load
+ts # view loaded structure
+tls # display the structure
+tp
+
+pf # define function signatures
+
+# shellcode emulation
+aeim
+aei
+aeir rax=0
+aes # stepping
 ```
 
 r2/rizin has a fork ability to split one proces in various thread (TODO)
