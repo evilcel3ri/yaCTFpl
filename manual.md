@@ -1948,6 +1948,41 @@ afvn # rename func variables
 afvt # set function variables type
 af # add/analyse function
 
+af                       # Analyze function at current address
+afa                      # Analyze function arguments
+afva                     # Analyze function variables and arguments
+afv                      # Show all function variables
+afvl                     # Show help for variable commands
+afi                      # Show function information including args count
+afv=                     # List variables with disassembly references
+afvf                     # Show BP relative stackframe variables
+afvx                     # Show variable cross-references (read/write)
+afvt                     # Display types for all variables
+afvt [name]              # Display type for specific variable
+afvt [name] [type]       # Set type for specific variable
+aft                      # Show function type/signature
+afvn [new_name] [old_name]    # Rename variable or argument
+afvn encrypted_data var_128h  # Example: rename var_128h to encrypted_data
+
+Ex:
+afvn argc arg_8h         # Rename first argument to argc
+afvn argv arg_ch         # Rename second argument to argv
+afvn envp arg_10h        # Rename third argument to envp
+afvt arg_8h int          # Set argument type to int
+afvt arg_ch char**       # Set argument type to char**
+afvt var_128h char[104]  # Set local variable type to char array
+# Common types you can use:
+# int, char, char*, char**, void*, HANDLE, DWORD, etc.
+
+# Analyze specific argument types
+afvr                     # Show register-based arguments
+afvs                     # Show stack-based arguments  
+afvb                     # Show BP-based arguments
+
+# Show where variables are used
+afvR [varname]           # Show READ accesses to variable
+afvW [varname]           # Show WRITE accesses to variable
+
 CC! # add comment
 CC <text> # append comment
 CC. # show comment
